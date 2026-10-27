@@ -1,4 +1,3 @@
-import { whatsappLink } from "@/lib/config";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
@@ -55,14 +54,8 @@ export default function PlanAheadPage() {
               <Button href="/login" className="w-full sm:w-auto">
                 Start here
               </Button>
-              <Button
-                href={whatsappLink()}
-                variant="secondary"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto"
-              >
-                Talk to a person
+              <Button href="/lawyers" variant="secondary" className="w-full sm:w-auto">
+                Talk to a lawyer
               </Button>
             </div>
           </Card>

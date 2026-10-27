@@ -128,6 +128,20 @@ export function saveChoices(patch: Record<string, string>): void {
   writeLocal(CHOICES_KEY, JSON.stringify({ ...readChoices(), ...patch }));
 }
 
+/*
+  The case id this device already knows about, without going anywhere
+  near the database and without creating anything.
+
+  ensureCaseId() below will happily start a case if there is none, which
+  is right when a family is answering questions and wrong everywhere
+  else. Somewhere that only wants to *mention* the case — asking a
+  lawyer for a consultation, say — uses this instead, so browsing the
+  panel never silently opens a case file on someone.
+*/
+export function rememberedCaseId(): string | null {
+  return readLocal(CASE_ID_KEY);
+}
+
 /** The draft kept on this device — the fallback copy of every answer. */
 export function readDraft(): CaseRecord {
   const raw = readLocal(DRAFT_KEY);

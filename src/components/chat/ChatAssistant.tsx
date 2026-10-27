@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { whatsappLink } from "@/lib/config";
 
 /*
   THE LITTLE CHAT BUTTON.
@@ -217,14 +217,9 @@ export function ChatAssistant() {
 
         <p className="mt-3 text-sm text-ink-muted">
           Guidance, not legal advice — a lawyer checks anything legal.{" "}
-          <a
-            href={whatsappLink()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sage-700 underline underline-offset-4"
-          >
-            Talk to a person
-          </a>
+          <Link href="/lawyers" onClick={() => setOpen(false)} className="text-sage-700 underline underline-offset-4">
+            Talk to a lawyer
+          </Link>
         </p>
       </form>
     </div>

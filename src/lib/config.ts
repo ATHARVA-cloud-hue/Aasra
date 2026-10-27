@@ -11,14 +11,16 @@ export const APP_TAGLINE = "Gentle help for families claiming what a loved one l
 /*
   ⚠️  REPLACE BEFORE LAUNCH  ⚠️
 
-  This is a FAKE placeholder number. Every "Talk to a person" button in
-  the app points at it, including the one inside the chat panel and the
-  one at the end of the case tracker.
+  This is a FAKE placeholder number. Every WhatsApp fallback in the app
+  points at it: the "I would rather just talk to someone" link on the
+  lawyers page, and — more importantly — the fallback that fires when a
+  consultation request cannot be recorded.
 
-  Right now, a family in real distress who taps "Talk to a person" opens
-  WhatsApp to a number that does not exist. That is the single worst
-  thing in this codebase to leave unfixed, because the people most
-  likely to tap it are the ones least able to cope with being ignored.
+  Right now, a family in real distress who asks for a lawyer and hits
+  that fallback opens WhatsApp to a number that does not exist. That is
+  the single worst thing in this codebase to leave unfixed, because the
+  people most likely to tap it are the ones least able to cope with
+  being ignored.
 
   To fix: put the real helpline below in both places. wa.me links need
   the country code, with no "+", spaces or dashes — so a Mumbai number

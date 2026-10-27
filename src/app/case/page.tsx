@@ -1,4 +1,3 @@
-import { whatsappLink } from "@/lib/config";
 import { prevStage, stageFor } from "@/lib/journey";
 import { StepPage } from "@/components/layout/StepPage";
 import { Button } from "@/components/ui/Button";
@@ -37,8 +36,8 @@ export default function CasePage() {
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Button href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-            Talk to a person
+          <Button href="/lawyers" className="w-full sm:w-auto">
+            Talk to a lawyer
           </Button>
           <Button href="/plan-ahead" variant="secondary" className="w-full sm:w-auto">
             Plan ahead for my own family

@@ -148,7 +148,82 @@ create index if not exists tasks_case_id_idx on public.tasks (case_id);
 
 
 -- ----------------------------------------------------------------------------
---  6. Keep cases.updated_at honest, automatically.
+--  6. LAWYERS — the panel behind the "Talk to a lawyer" page.
+--     Unlike every other table here, this one is PUBLIC to read: a family
+--     in the first hour after a death must be able to see who they can
+--     ask without creating an account first. There is nothing private in
+--     a row — it is the same information a lawyer puts on a nameplate.
+-- ----------------------------------------------------------------------------
+create table if not exists public.lawyers (
+  id          uuid primary key default gen_random_uuid(),
+
+  name        text not null,
+  photo_url   text,     -- optional; the cards fall back to initials
+
+  -- Free text rather than a check constraint, so the panel can grow
+  -- without a migration. The filter buttons in the app use these five:
+  --   Hindu succession, Muslim personal law, Christian/Parsi succession,
+  --   Property disputes, General
+  specialty   text,
+
+  city        text,
+  languages   text[],   -- e.g. '{Marathi,Hindi,English}'
+
+  years_experience       integer,
+
+  -- Whole rupees, never paise. Null means "ask us", and the app shows
+  -- "On request" rather than a misleading ₹0.
+  consultation_price_inr integer,
+  full_case_price_inr    integer,
+
+  bio         text,
+
+  -- Take somebody off the panel without deleting their history.
+  is_active   boolean not null default true,
+
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists lawyers_specialty_idx on public.lawyers (specialty);
+
+
+-- ----------------------------------------------------------------------------
+--  7. CONSULTATIONS — "Request a consultation" on a lawyer's card.
+--     One row per ask. Private to the family that asked.
+-- ----------------------------------------------------------------------------
+create table if not exists public.consultations (
+  id          uuid primary key default gen_random_uuid(),
+
+  user_id     uuid not null default auth.uid()
+              references auth.users (id) on delete cascade,
+
+  -- on delete set null: a lawyer leaving the panel must not erase the
+  -- fact that a family asked for help.
+  lawyer_id   uuid references public.lawyers (id) on delete set null,
+
+  -- The name as it was shown to the family, kept as plain text so the
+  -- request still reads correctly after any change to the panel.
+  lawyer_name text,
+
+  -- Optional. Set when the family already has a case open.
+  case_id     uuid references public.cases (id) on delete set null,
+
+  kind        text not null default 'consultation'
+              check (kind in ('consultation', 'full_case')),
+
+  status      text not null default 'requested'
+              check (status in ('requested', 'contacted', 'scheduled', 'closed')),
+
+  note        text,
+
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists consultations_user_id_idx on public.consultations (user_id);
+
+
+-- ----------------------------------------------------------------------------
+--  8. Keep cases.updated_at honest, automatically.
 -- ----------------------------------------------------------------------------
 create or replace function public.set_updated_at()
 returns trigger
@@ -169,24 +244,28 @@ create trigger cases_set_updated_at
 
 
 -- ============================================================================
---  7. ROW LEVEL SECURITY
+--  9. ROW LEVEL SECURITY
 -- ============================================================================
 --  Until RLS is switched on, anyone holding the public key could read every
 --  row in the database. With it on, Postgres filters every single query by
 --  "is this yours?" — so a family can only ever reach their own case.
 --
---  cases       : mine when cases.user_id is me.
+--  cases         : mine when cases.user_id is me.
+--  consultations : mine when consultations.user_id is me.
+--  lawyers       : readable by everyone, writable by nobody from the app.
 --  everything else : mine when it hangs off a case that is mine.
 --
 --  (auth.uid() is wrapped in "select" so Postgres works it out once per
 --  query instead of once per row — much faster on long lists.)
 -- ============================================================================
 
-alter table public.cases     enable row level security;
-alter table public.assets    enable row level security;
-alter table public.heirs     enable row level security;
-alter table public.documents enable row level security;
-alter table public.tasks     enable row level security;
+alter table public.cases         enable row level security;
+alter table public.assets        enable row level security;
+alter table public.heirs         enable row level security;
+alter table public.documents     enable row level security;
+alter table public.tasks         enable row level security;
+alter table public.lawyers       enable row level security;
+alter table public.consultations enable row level security;
 
 
 -- ---- cases ----------------------------------------------------------------
@@ -330,8 +409,47 @@ create policy "delete own tasks" on public.tasks
                  where c.id = tasks.case_id and c.user_id = (select auth.uid())));
 
 
+
+-- ---- lawyers ---------------------------------------------------------------
+--  The one deliberately public table. "anon, authenticated" means a family
+--  who has not logged in can still see the panel, which is the point: the
+--  page has to work in the first hour, before anyone makes an account.
+--
+--  There is no insert, update or delete policy, so nothing holding the
+--  public key can change the panel. Lawyers are added in the Supabase
+--  Table Editor, or by something using the service-role key on a server.
+
+drop policy if exists "anyone can read active lawyers" on public.lawyers;
+
+create policy "anyone can read active lawyers" on public.lawyers
+  for select to anon, authenticated
+  using (is_active);
+
+
+-- ---- consultations ---------------------------------------------------------
+--  Same shape as cases: mine when the row is mine. A family can see and
+--  make their own requests; the status column is moved along by our side,
+--  not by the app, so there is no update policy.
+
+drop policy if exists "read own consultations"   on public.consultations;
+drop policy if exists "create own consultations" on public.consultations;
+
+create policy "read own consultations" on public.consultations
+  for select to authenticated
+  using (user_id = (select auth.uid()));
+
+create policy "create own consultations" on public.consultations
+  for insert to authenticated
+  with check (user_id = (select auth.uid()));
+
+
 -- ============================================================================
 --  Done. You should see "Success. No rows returned".
---  Now open Table Editor and you will find: assets, cases, documents,
---  heirs, tasks — all empty, each with a shield icon meaning RLS is on.
+--  Now open Table Editor and you will find: assets, cases, consultations,
+--  documents, heirs, lawyers, tasks — all empty, each with a shield icon
+--  meaning RLS is on.
+--
+--  One last step for the lawyers table: it starts empty, and an empty
+--  table makes the app fall back to its five sample lawyers. Add real
+--  rows in Table Editor -> lawyers -> Insert row when you have them.
 -- ============================================================================

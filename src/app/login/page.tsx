@@ -1,4 +1,3 @@
-import { whatsappLink } from "@/lib/config";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
@@ -35,14 +34,8 @@ export default function LoginPage() {
             <Button href="/" variant="secondary" className="w-full sm:w-auto">
               Back to the start
             </Button>
-            <Button
-              href={whatsappLink()}
-              variant="quiet"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto"
-            >
-              I would rather talk to a person
+            <Button href="/lawyers" variant="quiet" className="w-full sm:w-auto">
+              I would rather talk to a lawyer
             </Button>
           </div>
         </FadeIn>

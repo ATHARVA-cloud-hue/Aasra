@@ -1,27 +1,33 @@
 import Link from "next/link";
-import { APP_NAME, whatsappLink } from "@/lib/config";
+import { APP_NAME } from "@/lib/config";
 import { Container } from "@/components/ui/Container";
 
-/* The quiet bar at the top of every page: name on the left, a human on the right. */
+/* The quiet bar at the top of every page: name on the left, a lawyer on the right. */
 export function SiteHeader() {
   return (
     <header className="py-5">
-      <Container className="flex items-center justify-between gap-4">
+      <Container className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <Link href="/" className="flex items-center gap-2.5" aria-label={`${APP_NAME} home`}>
           <LeafMark />
           <span className="font-serif text-2xl text-ink">{APP_NAME}</span>
         </Link>
 
-        <a
-          href={whatsappLink()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full px-3 py-2 text-base text-ink-soft transition-colors duration-300 hover:bg-sage-50 hover:text-sage-800"
-        >
-          Talk to a person
-        </a>
+        <nav aria-label="Get help" className="flex flex-wrap items-center gap-x-1 gap-y-1">
+          <HeaderLink href="/lawyers">Talk to a lawyer</HeaderLink>
+        </nav>
       </Container>
     </header>
+  );
+}
+
+function HeaderLink({ href, children }: { href: string; children: string }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-full px-3 py-2 text-base text-ink-soft transition-colors duration-300 hover:bg-sage-50 hover:text-sage-800"
+    >
+      {children}
+    </Link>
   );
 }
 

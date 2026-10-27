@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { APP_NAME, LEGAL_LINE, whatsappLink } from "@/lib/config";
+import { APP_NAME, LEGAL_LINE } from "@/lib/config";
 import { Container } from "@/components/ui/Container";
 
 /* Footer on every page, carrying the "not a law firm" line from the brief. */
@@ -19,14 +19,7 @@ export function SiteFooter() {
               <FooterLink href="/plan-ahead">Plan ahead</FooterLink>
             </li>
             <li>
-              <a
-                href={whatsappLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors duration-300 hover:text-sage-800"
-              >
-                Talk to a person
-              </a>
+              <FooterLink href="/lawyers">Talk to a lawyer</FooterLink>
             </li>
           </ul>
         </nav>
