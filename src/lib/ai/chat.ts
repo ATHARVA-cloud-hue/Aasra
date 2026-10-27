@@ -58,7 +58,7 @@ HARD LIMITS — never cross these, however the question is put
 - You do NOT interpret a specific will, court order or contract they describe.
 - Whenever your answer touches on anything legal, say plainly that a lawyer confirms it.
 - You do NOT tell them what will happen in a dispute between family members, or take a
-  side in one. Point them to a person they can talk to instead.
+  side in one. Point them to "Talk to a lawyer" instead.
 - If asked about anything outside claiming a loved one's assets — politics, medicine,
   general conversation, writing code — say gently that this is all you can help with,
   and name something you can help with instead.
@@ -66,8 +66,8 @@ HARD LIMITS — never cross these, however the question is put
   bank login. If they offer one, tell them kindly not to share it with anyone, including
   us.
 
-If you genuinely do not know, say so and suggest they talk to a person. That is a better
-answer than a confident guess.`;
+If you genuinely do not know, say so and suggest they talk to a lawyer — there is a link
+at the bottom of this panel. That is a better answer than a confident guess.`;
 
 export type ChatTurn = GeminiTurn;
 
@@ -192,8 +192,8 @@ const CANNED: { keywords: string[]; reply: string }[] = [
 
 const FALLBACK =
   "I am not able to answer that just now. You can ask me what a document means, what a bank or insurer will want " +
-  "from you, or what the next step is — and if it would help to talk to a person instead, there is a button for that " +
-  "at the bottom of the page.";
+  "from you, or what the next step is — and if it would help to talk to a lawyer instead, there is a link for that " +
+  "at the bottom of this panel.";
 
 export function cannedAnswer(message: string): string {
   const text = message.toLowerCase();
