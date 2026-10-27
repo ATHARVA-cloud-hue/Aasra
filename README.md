@@ -36,7 +36,7 @@ Restart `npm run dev` after changing `.env.local`.
 | | Demo mode (no keys) | With keys |
 | --- | --- | --- |
 | Data | Fictional sample families, saved in the browser | Saved in Supabase |
-| Login | "Carry on without an account", or "Continue as a demo family" | Email + a six-digit code, or either of the account-free choices |
+| Login | "Carry on without an account", or "Continue as a demo family" | Email + password, or either of the account-free choices |
 | Lawyer panel | Five clearly-labelled sample lawyers | The `lawyers` table (falls back to the samples while it is empty) |
 | Consultation requests | Opens WhatsApp with the lawyer's name filled in | A row in `consultations`, with WhatsApp as the fallback |
 | AI features | Pre-written sample answers | Live Claude responses |
@@ -45,24 +45,28 @@ A small banner at the top of the page shows when demo mode is on.
 
 ## Supabase setup
 
-Three steps, in this order. Everything still works without them — this is what turns the database and accounts on.
+A few steps, in this order. Everything still works without them — this is what turns the database and accounts on.
 
-**1. The tables.** Dashboard → SQL Editor → New query → paste all of `supabase/schema.sql` → Run. Safe to run again at any time; it will not delete data. You should end up with `assets`, `cases`, `consultations`, `documents`, `heirs`, `lawyers` and `tasks`, each with a shield icon meaning Row Level Security is on.
+**1. The tables.** Dashboard → SQL Editor → New query → paste all of `supabase/schema.sql` → Run. Safe to run again at any time; it will not delete data. You should end up with `assets`, `cases`, `consultations`, `documents`, `heirs`, `lawyers`, `profiles` and `tasks`, each with a shield icon meaning Row Level Security is on.
 
-**2. Email login.** Dashboard → Authentication → Sign In / Providers:
+**2. Email + password login.** Dashboard → Authentication → Sign In / Providers:
 
-- Turn **Email** on, with "Confirm email" enabled.
-- Then go to Authentication → **Emails** → the **Magic Link** template, and make sure the body contains `{{ .Token }}`. This is the step everyone misses: Supabase sends a clickable link by default, and the app asks for a six-digit code. Without `{{ .Token }}` in that template, the email arrives but there is no code in it to type.
-- Optional: turn **Anonymous sign-ins** on as well. The app prefers a real email session and only falls back to this, which lets somebody who has not made an account still have their case saved in the database rather than only on their device.
+- Turn **Email** on.
+- Turn **"Confirm email" OFF.** This is the one that matters. With it on, signing up creates the account but gives back no session, so the person is not logged in until they open an email and click a link — which means login depends on email delivery after all. With it off, creating an account logs you straight in and no email is ever sent. The app handles both (it says plainly when a confirmation is pending), but off is what you want.
+- Optional: turn **Anonymous sign-ins** on as well. The app prefers a real account and only falls back to this, which lets somebody who has not signed up still have their case saved in the database rather than only on their device.
 
-**3. The lawyer panel.** The `lawyers` table starts empty, and an empty table makes `/lawyers` fall back to its five sample lawyers. Add real rows in Table Editor → `lawyers` → Insert row. `languages` is a text array, so enter it as `{Marathi,Hindi,English}`. Prices are whole rupees — leave one blank and the card says "On request" rather than ₹0.
+Nothing here needs an SMTP server, a template or `{{ .Token }}`. If you later turn confirmations back on, Supabase's own default email is enough.
+
+**3. Nothing to do for `profiles`.** The table is created by step 1 and the app upserts a row after every sign-up and log-in. If the upsert fails for any reason, login still works — the row is our bookkeeping, not a gate.
+
+**4. The lawyer panel.** The `lawyers` table starts empty, and an empty table makes `/lawyers` fall back to its five sample lawyers. Add real rows in Table Editor → `lawyers` → Insert row. `languages` is a text array, so enter it as `{Marathi,Hindi,English}`. Prices are whole rupees — leave one blank and the card says "On request" rather than ₹0.
 
 Nothing in the app can write to `lawyers`: there is no insert or update policy, deliberately. Rows go in through the dashboard, or from a server holding the service-role key.
 
 ## Build progress
 
 - [x] Stage 1: Setup, calm design system, landing page, footer, demo-mode detection
-- [x] Stage 2: Data models, sample families, login (email + six-digit code)
+- [x] Stage 2: Data models, sample families, login (email + password)
 - [x] Stage 3: Intake wizard with autosave
 - [x] Stage 4: AI document reading
 - [x] Stage 5: Heir result and checklist, per faith

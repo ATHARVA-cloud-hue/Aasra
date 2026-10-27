@@ -223,7 +223,26 @@ create index if not exists consultations_user_id_idx on public.consultations (us
 
 
 -- ----------------------------------------------------------------------------
---  8. Keep cases.updated_at honest, automatically.
+--  8. PROFILES — one row per account, kept in step after sign-up and log-in.
+--     auth.users already holds the email; this is the copy our own tables
+--     are allowed to join against, plus a name to address someone by.
+-- ----------------------------------------------------------------------------
+create table if not exists public.profiles (
+  -- The same id as the account, not a new one. on delete cascade means
+  -- deleting the account takes the profile with it.
+  id         uuid primary key
+             references auth.users (id) on delete cascade,
+
+  email      text,
+  full_name  text,   -- optional; nobody is made to give a name
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+
+-- ----------------------------------------------------------------------------
+--  9. Keep cases.updated_at honest, automatically.
 -- ----------------------------------------------------------------------------
 create or replace function public.set_updated_at()
 returns trigger
@@ -242,9 +261,16 @@ create trigger cases_set_updated_at
   before update on public.cases
   for each row execute function public.set_updated_at();
 
+-- The same trigger, reused: profiles.updated_at moves every time a
+-- log-in refreshes the row.
+drop trigger if exists profiles_set_updated_at on public.profiles;
+create trigger profiles_set_updated_at
+  before update on public.profiles
+  for each row execute function public.set_updated_at();
+
 
 -- ============================================================================
---  9. ROW LEVEL SECURITY
+--  10. ROW LEVEL SECURITY
 -- ============================================================================
 --  Until RLS is switched on, anyone holding the public key could read every
 --  row in the database. With it on, Postgres filters every single query by
@@ -252,6 +278,7 @@ create trigger cases_set_updated_at
 --
 --  cases         : mine when cases.user_id is me.
 --  consultations : mine when consultations.user_id is me.
+--  profiles      : mine when profiles.id is me.
 --  lawyers       : readable by everyone, writable by nobody from the app.
 --  everything else : mine when it hangs off a case that is mine.
 --
@@ -266,6 +293,7 @@ alter table public.documents     enable row level security;
 alter table public.tasks         enable row level security;
 alter table public.lawyers       enable row level security;
 alter table public.consultations enable row level security;
+alter table public.profiles      enable row level security;
 
 
 -- ---- cases ----------------------------------------------------------------
@@ -443,11 +471,38 @@ create policy "create own consultations" on public.consultations
   with check (user_id = (select auth.uid()));
 
 
+-- ---- profiles --------------------------------------------------------------
+--  The app upserts this row after every sign-up and log-in, so it needs
+--  insert and update as well as select. All three check the same thing:
+--  the row's id must be your own account. Nobody can write a profile for
+--  somebody else, or read one.
+--
+--  No delete policy: a profile goes when the account goes, through the
+--  "on delete cascade" on the id column.
+
+drop policy if exists "read own profile"   on public.profiles;
+drop policy if exists "create own profile" on public.profiles;
+drop policy if exists "update own profile" on public.profiles;
+
+create policy "read own profile" on public.profiles
+  for select to authenticated
+  using (id = (select auth.uid()));
+
+create policy "create own profile" on public.profiles
+  for insert to authenticated
+  with check (id = (select auth.uid()));
+
+create policy "update own profile" on public.profiles
+  for update to authenticated
+  using (id = (select auth.uid()))
+  with check (id = (select auth.uid()));
+
+
 -- ============================================================================
 --  Done. You should see "Success. No rows returned".
 --  Now open Table Editor and you will find: assets, cases, consultations,
---  documents, heirs, lawyers, tasks — all empty, each with a shield icon
---  meaning RLS is on.
+--  documents, heirs, lawyers, profiles, tasks — all empty, each with a
+--  shield icon meaning RLS is on.
 --
 --  One last step for the lawyers table: it starts empty, and an empty
 --  table makes the app fall back to its five sample lawyers. Add real

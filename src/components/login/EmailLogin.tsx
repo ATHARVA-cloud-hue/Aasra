@@ -1,97 +1,89 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { FIRST_INTAKE_HREF } from "@/lib/journey";
-import { canEmailSignIn, sendEmailCode, signOut, useAuth, verifyEmailCode } from "@/lib/auth";
+import {
+  canEmailSignIn,
+  createAccount,
+  logIn,
+  MIN_PASSWORD,
+  signOut,
+  useAuth,
+} from "@/lib/auth";
 
 /*
-  LOG IN OR CREATE ACCOUNT — two steps, no password.
+  LOG IN, OR CREATE AN ACCOUNT — an email and a password.
 
-  Step one is an email box. Step two is the six digits we just sent.
-  There is no third step, and no separate "sign up": the first code
-  somebody uses creates their account, and every code after that logs
-  them in. A person who has just lost somebody should not have to work
-  out which of two buttons applies to them.
+  One form, with a toggle at the top deciding which of the two it is.
+  The fields are the same either way, so switching between them keeps
+  whatever has already been typed: somebody who tried to log in, found
+  they had never signed up, and switched across should not have to type
+  their email again.
 
   What it is careful about:
 
-  - WRONG AND EXPIRED CODES read the same way as a missed phone call,
-    not a failure. The message always says what to do next, and the
-    "Send me another" button is right there.
+  - A WRONG PASSWORD IS NOT AN ERROR MESSAGE, it is a nudge. It says
+    that passwords are case-sensitive and that caps lock is worth
+    checking, and the two commonest mistakes — signing up with an email
+    that already exists, logging in without ever having signed up —
+    each name the toggle that fixes them.
 
-  - THE EMAIL STAYS ON SCREEN at step two, with a way back to change
-    it, because the single commonest reason a code never arrives is a
-    typo nobody can see any more.
+  - THE PASSWORD CAN BE SHOWN. Typing eight unseen characters on a
+    phone, in the state people are in when they reach this page, is
+    hard enough to be a reason they give up.
 
   - WITHOUT SUPABASE KEYS the form is not shown as broken. It explains
     that accounts are not switched on in this copy and points at the
     choices below, which work perfectly well without one.
 */
 
-type Step = "email" | "code";
-
-/** How long before "Send me another" becomes tappable, in seconds. */
-const RESEND_WAIT = 30;
+type Mode = "login" | "create";
 
 export function EmailLogin() {
   const router = useRouter();
   const auth = useAuth();
 
-  const [step, setStep] = useState<Step>("email");
+  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [reveal, setReveal] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [wait, setWait] = useState(0);
+  const [confirm, setConfirm] = useState<string | null>(null);
 
-  const codeRef = useRef<HTMLInputElement>(null);
+  function switchTo(next: Mode) {
+    setMode(next);
+    // The email and password stay; only what we were told about the
+    // last attempt is no longer true.
+    setProblem(null);
+    setConfirm(null);
+  }
 
-  // Count down to the next "Send me another".
-  useEffect(() => {
-    if (wait <= 0) return;
-    const timer = setTimeout(() => setWait((seconds) => seconds - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [wait]);
-
-  // Put the cursor in the digits box the moment it appears.
-  useEffect(() => {
-    if (step === "code") codeRef.current?.focus();
-  }, [step]);
-
-  async function send(resending = false) {
+  async function submit() {
     setBusy(true);
     setProblem(null);
-    setNotice(null);
+    setConfirm(null);
 
-    const result = await sendEmailCode(email);
-    setBusy(false);
+    const result =
+      mode === "create" ? await createAccount(email, password, fullName) : await logIn(email, password);
 
-    if (!result.ok) {
+    if (result.status === "problem") {
+      setBusy(false);
       setProblem(result.message);
       return;
     }
 
-    setStep("code");
-    setWait(RESEND_WAIT);
-    setNotice(resending ? "Sent again. The newest code is the one that works." : null);
-  }
-
-  async function verify() {
-    setBusy(true);
-    setProblem(null);
-    setNotice(null);
-
-    const result = await verifyEmailCode(email, code);
-
-    if (!result.ok) {
+    // Account made, but it needs confirming before it can be used.
+    // Nothing has gone wrong, so this is not shown as a problem — and
+    // the form is left usable so they can log in once they are back.
+    if (result.status === "confirm") {
       setBusy(false);
-      setCode("");
-      setProblem(result.message);
-      codeRef.current?.focus();
+      setMode("login");
+      setConfirm(result.message);
       return;
     }
 
@@ -103,8 +95,8 @@ export function EmailLogin() {
       Left busy on purpose: the page is about to change, and a button
       that springs back to life first would invite a second tap.
     */
-    const { setMode } = await import("@/lib/caseStore");
-    setMode("real");
+    const { setMode: setCaseMode } = await import("@/lib/caseStore");
+    setCaseMode("real");
     router.push(FIRST_INTAKE_HREF);
   }
 
@@ -139,30 +131,45 @@ export function EmailLogin() {
           lost: carry on below and your answers are kept safely on this device.
         </p>
         <p className="mt-4 text-sm text-ink-muted">
-          When accounts are switched on, you will be able to enter your email, receive a six-digit code, and reach
-          your case from any phone or computer.
+          When accounts are switched on, you will be able to make one with an email and a password, and reach your
+          case from any phone or computer.
         </p>
       </Card>
     );
   }
 
-  // ---- Step one: the email ----
-  if (step === "email") {
-    return (
-      <Card>
-        <h2 className="text-xl">Log in or create account</h2>
-        <p className="mt-2 text-ink-soft">
-          Enter your email and we will send you a six-digit code. There is no password to remember, and no difference
-          between logging in and signing up — the first code makes your account.
-        </p>
+  const creating = mode === "create";
 
-        <form
-          className="mt-6"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void send();
-          }}
-        >
+  return (
+    <Card>
+      <h2 className="text-xl">{creating ? "Create your account" : "Log in"}</h2>
+      <p className="mt-2 text-ink-soft">
+        {creating
+          ? "An email and a password, and your case will follow you to any phone or computer you log in on."
+          : "Welcome back. Log in and your case will be where you left it."}
+      </p>
+
+      {/*
+        Radio buttons under the pills, not plain <button>s: arrow keys
+        move between the two and a screen reader announces them as the
+        one either/or choice they are.
+      */}
+      <fieldset className="mt-6 border-0 p-0">
+        <legend className="sr-only">Do you already have an account?</legend>
+        <div className="flex flex-wrap gap-2">
+          <Toggle label="Log in" chosen={!creating} onPick={() => switchTo("login")} />
+          <Toggle label="Create account" chosen={creating} onPick={() => switchTo("create")} />
+        </div>
+      </fieldset>
+
+      <form
+        className="mt-6 space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submit();
+        }}
+      >
+        <div>
           <label htmlFor="login-email" className="text-base font-medium text-ink">
             Your email
           </label>
@@ -175,106 +182,135 @@ export function EmailLogin() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@example.com"
             disabled={busy}
-            className="mt-2 w-full rounded-2xl border border-line bg-cream px-4 py-3 text-base text-ink placeholder:text-ink-muted focus:border-sage-400 disabled:opacity-60"
+            className={box}
           />
+        </div>
 
-          <Button
-            type="submit"
-            size="lg"
-            className="mt-5 w-full sm:w-auto"
-            disabled={busy || !email.trim()}
-          >
-            {busy ? "Sending…" : "Send me a code"}
-          </Button>
-        </form>
+        <div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+            <label htmlFor="login-password" className="text-base font-medium text-ink">
+              Your password
+            </label>
+            <button
+              type="button"
+              onClick={() => setReveal((shown) => !shown)}
+              className="text-sm text-sage-700 underline-offset-4 hover:underline"
+            >
+              {reveal ? "Hide password" : "Show password"}
+            </button>
+          </div>
 
-        <Problem text={problem} />
+          {creating && (
+            <p className="mt-1 text-sm text-ink-muted">
+              At least {MIN_PASSWORD} characters. A few ordinary words together is easier to remember than
+              something complicated, and harder to guess.
+            </p>
+          )}
 
-        <p className="mt-4 text-sm text-ink-muted">
-          We use your email to find your case again, and for nothing else. No password, and no marketing.
-        </p>
-      </Card>
-    );
-  }
+          <input
+            id="login-password"
+            type={reveal ? "text" : "password"}
+            autoComplete={creating ? "new-password" : "current-password"}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            disabled={busy}
+            className={box}
+          />
+        </div>
 
-  // ---- Step two: the six digits ----
-  return (
-    <Card>
-      <h2 className="text-xl">Check your email</h2>
-      <p className="mt-2 text-ink-soft">
-        We have sent a six-digit code to <span className="text-ink">{email}</span>. It can take a minute, and it is
-        worth a look in your spam folder.
-      </p>
+        {creating && (
+          <div>
+            <label htmlFor="login-name" className="text-base font-medium text-ink">
+              Your name
+            </label>
+            <p className="mt-1 text-sm text-ink-muted">
+              Optional, and only so we know what to call you when we write to you.
+            </p>
+            <input
+              id="login-name"
+              type="text"
+              autoComplete="name"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              placeholder="Leave blank if you would rather not"
+              disabled={busy}
+              className={box}
+            />
+          </div>
+        )}
 
-      <form
-        className="mt-6"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void verify();
-        }}
-      >
-        <label htmlFor="login-code" className="text-base font-medium text-ink">
-          The six digits
-        </label>
-        <input
-          ref={codeRef}
-          id="login-code"
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          maxLength={6}
-          value={code}
-          onChange={(event) => setCode(event.target.value.replace(/\D/g, ""))}
-          placeholder="123456"
-          disabled={busy}
-          className="mt-2 w-full rounded-2xl border border-line bg-cream px-4 py-3 text-lg tracking-[0.4em] text-ink placeholder:tracking-normal placeholder:text-ink-muted focus:border-sage-400 disabled:opacity-60"
-        />
-
-        <Button type="submit" size="lg" className="mt-5 w-full sm:w-auto" disabled={busy || code.length < 6}>
-          {busy ? "Checking…" : "Verify and continue"}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full sm:w-auto"
+          disabled={busy || !email.trim() || !password}
+        >
+          {busy
+            ? creating
+              ? "Creating your account…"
+              : "Logging you in…"
+            : creating
+              ? "Create my account"
+              : "Log in"}
         </Button>
       </form>
 
       <Problem text={problem} />
 
-      {notice && (
-        <p className="mt-4 text-sm text-sage-800" role="status">
-          <span aria-hidden="true">✓ </span>
-          {notice}
+      {confirm && (
+        <p className="mt-4 rounded-2xl bg-sage-50 px-4 py-3 text-sm text-sage-800" role="status">
+          {confirm}
         </p>
       )}
 
-      <div className="mt-6 flex flex-col gap-3 border-t border-line pt-5 sm:flex-row">
-        <Button
-          variant="quiet"
-          disabled={busy || wait > 0}
-          onClick={() => void send(true)}
-          className="sm:w-auto"
-        >
-          {wait > 0 ? `Send me another in ${wait}s` : "Send me another"}
-        </Button>
-
-        <Button
-          variant="quiet"
-          disabled={busy}
-          onClick={() => {
-            setStep("email");
-            setCode("");
-            setProblem(null);
-            setNotice(null);
-          }}
-          className="sm:w-auto"
-        >
-          Use a different email
-        </Button>
-      </div>
+      <p className="mt-5 text-sm text-ink-muted">
+        We use your email to find your case again, and for nothing else. No marketing, ever.
+      </p>
     </Card>
   );
 }
 
+/* Shared by all three boxes, so they cannot drift apart. */
+const box =
+  "mt-2 w-full rounded-2xl border border-line bg-cream px-4 py-3 text-base text-ink " +
+  "placeholder:text-ink-muted focus:border-sage-400 disabled:opacity-60";
+
+function Toggle({
+  label,
+  chosen,
+  onPick,
+}: {
+  label: string;
+  chosen: boolean;
+  onPick: () => void;
+}) {
+  return (
+    <label
+      className={
+        "min-h-12 cursor-pointer rounded-2xl border px-4 py-2.5 text-base transition-colors duration-200 " +
+        "flex items-center focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 " +
+        "focus-within:outline-sage-400 " +
+        (chosen
+          ? "border-sage-600 bg-sage-600 text-white"
+          : "border-sage-200 bg-paper text-sage-800 hover:border-sage-400 hover:bg-sage-50")
+      }
+    >
+      <input
+        type="radio"
+        name="login-mode"
+        checked={chosen}
+        onChange={onPick}
+        className="sr-only"
+      />
+      {label}
+    </label>
+  );
+}
+
 /*
-  Clay rather than red. It is almost always a stale code or a typo,
-  neither of which deserves alarm — and the brief rules out red anyway.
+  Clay rather than red. It is almost always a mistyped password or the
+  wrong one of the two modes, neither of which deserves alarm — and the
+  brief rules out red anyway.
 */
 function Problem({ text }: { text: string | null }) {
   if (!text) return null;

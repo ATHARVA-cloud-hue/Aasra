@@ -9,8 +9,8 @@ import { LoginChoices } from "@/components/login/LoginChoices";
 
   Three ways in, in the order they are worth to the person reading:
 
-  1. An email and a six-digit code (EmailLogin). The only one that
-     follows them to another device, so it goes first.
+  1. An email and a password (EmailLogin). The only one that follows
+     them to another device, so it goes first.
   2. Carry on without an account, kept on this device.
   3. Walk through with a sample family.
 

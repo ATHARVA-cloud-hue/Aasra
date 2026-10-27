@@ -191,10 +191,10 @@ function mergeDraft(patch: CaseRecord): CaseRecord {
   it can find out. They are tried in this order, which is the whole
   point of this function:
 
-  1. A REAL ACCOUNT. Somebody who logged in with their email and a
-     one-time code — see src/lib/auth.ts. Their case follows them to
-     any device they log in on, which is the reason to have an account
-     at all.
+  1. A REAL ACCOUNT. Somebody who logged in with their email and
+     password — see src/lib/auth.ts. Their case follows them to any
+     device they log in on, which is the reason to have an account at
+     all.
 
   2. ANONYMOUS SIGN-IN. The browser gets a user account with no email
      and no password. Enough for the database to keep this case private
