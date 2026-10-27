@@ -87,6 +87,77 @@ const HINDU_SUCCESSION = ["hindu", "sikh", "buddhist", "jain"];
 /* The Indian Succession Act covers Christians, Parsis and others. */
 const INDIAN_SUCCESSION = ["christian", "parsi", "other"];
 
+/*
+  Which law applies, on its own — before we know anything about the
+  family. calculateHeirs() below needs names and relationships before
+  it can say anything; this needs only the one answer.
+
+  It exists so a visitor who has chosen a faith and nothing else still
+  gets a real answer rather than "tell us more". The two share the
+  lists above, so they can never disagree about which Act applies.
+*/
+export type ApplicableLaw = {
+  /** The Act, named plainly. */
+  law: string;
+  /** One or two calm sentences about what that means in practice. */
+  note: string;
+};
+
+export function lawForReligion(religion?: string | null): ApplicableLaw {
+  const key = (religion ?? "").trim().toLowerCase();
+
+  if (!key) {
+    return {
+      law: "Not yet known",
+      note:
+        "Tell us which faith they followed and we can name the law that applies to your family, and what it " +
+        "means for how an estate is divided.",
+    };
+  }
+
+  if (key === "muslim") {
+    return {
+      law: "Muslim personal law (the Shariat Application Act, 1937)",
+      note:
+        "Shares are set by personal law rather than by a single Act of Parliament, and they depend on exactly " +
+        "which relatives survive and which school of law your family follows. We will name the likely heirs, " +
+        "but a lawyer who practises in this area works out each share — a confidently wrong fraction is far " +
+        "worse than an honest gap.",
+    };
+  }
+
+  if (HINDU_SUCCESSION.includes(key)) {
+    return {
+      law: "The Hindu Succession Act, 1956",
+      note:
+        "The Act covers Hindus, Sikhs, Buddhists and Jains — that is the Act's own definition, not a statement " +
+        "about these being one faith. Where there is no will, the closest family each take one equal share: a " +
+        "surviving spouse, every child, and a surviving mother alike. Sons and daughters inherit the same.",
+    };
+  }
+
+  if (INDIAN_SUCCESSION.includes(key)) {
+    return {
+      law: "The Indian Succession Act, 1925",
+      note:
+        "Where there is no will, a surviving spouse takes a third of the estate and the children share the " +
+        "remaining two thirds between them. With no children, the spouse inherits everything; with no spouse, " +
+        "the children share it equally.",
+    };
+  }
+
+  // "private", and anything a future list might add.
+  return {
+    law: "To be confirmed",
+    note:
+      key === "private"
+        ? "You would rather not say, which is completely your right. We can still show you the closest family, " +
+          "who are heirs under every one of India's succession laws — but which law sets the exact shares " +
+          "depends on that answer, so we leave the shares for a lawyer."
+        : "We will confirm which of India's succession laws applies to your family before anything is filed.",
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /*  The calculation                                                   */
 /* ------------------------------------------------------------------ */

@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { AskButton } from "@/components/chat/AskButton";
+import { ReligionChoice } from "@/components/religion/ReligionChoice";
 
 /*
   LANDING PAGE
@@ -83,6 +84,15 @@ export default function Home() {
               </p>
               <AskButton className="mt-6 w-full sm:w-auto">Ask our assistant</AskButton>
             </Card>
+          </FadeIn>
+        </Container>
+      </section>
+
+      {/* ---------- Which law applies ---------- */}
+      <section className="py-10">
+        <Container width="narrow">
+          <FadeIn>
+            <ReligionChoice />
           </FadeIn>
         </Container>
       </section>

@@ -157,8 +157,13 @@ const YES_NO_UNSURE: IntakeOption[] = [...YES_NO, { value: "unsure", label: "Not
   The faiths that decide which inheritance law applies in India.
   "Prefer not to say" is a real, respected answer: we fall back to the
   general closest-family rules and let a lawyer confirm.
+
+  Exported because the same list is now offered twice: here as question
+  five of the wizard, and on the landing page as a way straight into
+  "what the law says for your family". One list, so the two can never
+  drift apart or offer a value the heirs engine does not recognise.
 */
-const RELIGIONS: IntakeOption[] = [
+export const RELIGIONS: IntakeOption[] = [
   { value: "hindu", label: "Hindu" },
   { value: "muslim", label: "Muslim" },
   { value: "christian", label: "Christian" },
