@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { onOpenChat } from "@/lib/chatBus";
 
 /*
   THE LITTLE CHAT BUTTON.
 
-  Sits quietly in the corner of every page in the journey. Someone
-  halfway through a form, stuck on a word a bank used, can ask without
-  losing their place or feeling they are bothering anyone.
+  Mounted once in the root layout, so it sits quietly in the corner of
+  every page — the landing page and the lawyer panel included, not just
+  the journey. Someone halfway through a form, stuck on a word a bank
+  used, can ask without losing their place or feeling they are
+  bothering anyone.
+
+  Anywhere else that should open it calls openChat() from
+  src/lib/chatBus.ts rather than rendering a second copy of this panel.
 
   Deliberate choices:
   - It starts closed and small. Nothing pops open at a grieving person.
@@ -41,6 +47,9 @@ export function ChatAssistant() {
   const inputRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Anything anywhere in the app can ask for the panel — see chatBus.ts.
+  useEffect(() => onOpenChat(() => setOpen(true)), []);
 
   // Escape closes the panel, wherever the cursor happens to be.
   useEffect(() => {

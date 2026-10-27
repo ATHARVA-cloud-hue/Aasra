@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { AskButton } from "@/components/chat/AskButton";
 
 /*
   LANDING PAGE
@@ -66,6 +67,22 @@ export default function Home() {
 
           <FadeIn delay={600}>
             <p className="mt-6 text-sm text-ink-muted">Free to begin · No will needed · You can stop and come back anytime</p>
+          </FadeIn>
+        </Container>
+      </section>
+
+      {/* ---------- A doubt, right now ---------- */}
+      <section className="pb-8">
+        <Container width="narrow">
+          <FadeIn>
+            <Card className="text-center">
+              <h2 className="text-xl">Have an immediate doubt?</h2>
+              <p className="mt-2 text-ink-soft">
+                You do not have to start anything to ask. Say what is worrying you, in your own words, and our
+                assistant will answer in plain language — at three in the morning if that is when it comes.
+              </p>
+              <AskButton className="mt-6 w-full sm:w-auto">Ask our assistant</AskButton>
+            </Card>
           </FadeIn>
         </Container>
       </section>

@@ -5,6 +5,7 @@ import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { DemoModeBanner } from "@/components/layout/DemoModeBanner";
+import { ChatAssistant } from "@/components/chat/ChatAssistant";
 
 // Warm serif for headings — feels like a trusted letter.
 const fraunces = Fraunces({
@@ -49,6 +50,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />
+
+        {/*
+          Mounted once, here, so the "Ask a question" button is in the
+          corner of every page — not only the journey. Anywhere that
+          wants to open it calls openChat() from src/lib/chatBus.ts.
+        */}
+        <ChatAssistant />
       </body>
     </html>
   );

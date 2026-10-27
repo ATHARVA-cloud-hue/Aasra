@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { JourneyProgress } from "@/components/layout/JourneyProgress";
-import { ChatAssistant } from "@/components/chat/ChatAssistant";
 
 /*
   The shared shape of every page inside the journey:
@@ -73,9 +72,6 @@ export function StepPage({
 
         {footnote && <p className="mt-8 text-sm text-ink-muted">{footnote}</p>}
       </Container>
-
-      {/* Mounted here, so it is on every page of the journey and nowhere else. */}
-      <ChatAssistant />
     </section>
   );
 }
