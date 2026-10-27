@@ -1,0 +1,43 @@
+import Link from "next/link";
+import { APP_NAME, whatsappLink } from "@/lib/config";
+import { Container } from "@/components/ui/Container";
+
+/* The quiet bar at the top of every page: name on the left, a human on the right. */
+export function SiteHeader() {
+  return (
+    <header className="py-5">
+      <Container className="flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-2.5" aria-label={`${APP_NAME} home`}>
+          <LeafMark />
+          <span className="font-serif text-2xl text-ink">{APP_NAME}</span>
+        </Link>
+
+        <a
+          href={whatsappLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full px-3 py-2 text-base text-ink-soft transition-colors duration-300 hover:bg-sage-50 hover:text-sage-800"
+        >
+          Talk to a person
+        </a>
+      </Container>
+    </header>
+  );
+}
+
+/* A simple leaf drawn in SVG — our small, calm logo. */
+function LeafMark() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="15" fill="var(--color-sage-100)" />
+      <path
+        d="M10 22c0-7 5-12 13-12 0 8-5 13-12 13"
+        fill="none"
+        stroke="var(--color-sage-600)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path d="M10 22l7-7" stroke="var(--color-sage-600)" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}

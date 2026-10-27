@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/*
+  =========================================================
+  DESIGN TOKENS — the whole "calm room" look lives here.
+  Tailwind v4 turns every --color-* below into classes,
+  e.g. --color-sage-600 → bg-sage-600, text-sage-600.
+  Rules from the brief: cream background, sage accent,
+  charcoal text. NO red, NO bright yellow.
+  =========================================================
+*/
+@theme {
+  /* Backgrounds */
+  --color-cream: #faf7f2; /* page background */
+  --color-paper: #fffdf9; /* cards sit on this — slightly lighter */
+  --color-line: #e7e1d6; /* soft borders and dividers */
+
+  /* Text (deep charcoal, never pure black) */
+  --color-ink: #2d2d2a;
+  --color-ink-soft: #55554f;
+  --color-ink-muted: #77756c;
+
+  /* Sage green accent */
+  --color-sage-50: #f1f5f1;
+  --color-sage-100: #e1eae2;
+  --color-sage-200: #c6d6c8;
+  --color-sage-400: #84a38a;
+  --color-sage-600: #4f7358; /* primary buttons — passes contrast with white text */
+  --color-sage-700: #3f5e47; /* hover */
+  --color-sage-800: #304836;
+
+  /* A muted clay tone for "needs attention" (e.g. pending review).
+     Warm and quiet — deliberately not red or yellow. */
+  --color-clay-50: #f8f1ec;
+  --color-clay-200: #e6cfc0;
+  --color-clay-700: #8a5a43;
+
+  /* Fonts — the variables are filled in by next/font in layout.tsx */
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Soft, slow motion. Used as `animate-fade-up` / `animate-fade-in`. */
+  --animate-fade-up: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 1.2s ease-out both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Base page styles: large, readable text for older users. */
+html {
+  font-size: 112.5%; /* 18px base instead of 16px */
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.65;
+}
+
+/* Headings use the warm serif, like a trusted letter. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  color: var(--color-ink);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* A clear, gentle focus ring for keyboard users. */
+:focus-visible {
+  outline: 3px solid var(--color-sage-400);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--color-sage-100);
+}
+
+/* Respect people who ask their device for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
