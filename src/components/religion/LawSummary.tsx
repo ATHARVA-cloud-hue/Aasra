@@ -28,7 +28,7 @@ import { lawForReligion, type ApplicableLaw } from "@/lib/heirs/engine";
 
 type View =
   | { kind: "loading" }
-  | { kind: "ready"; faith: string | null; law: ApplicableLaw };
+  | { kind: "ready"; faith: string | null; law: ApplicableLaw; demo: boolean };
 
 export function LawSummary() {
   const searchParams = useSearchParams();
@@ -40,19 +40,20 @@ export function LawSummary() {
     let cancelled = false;
 
     void (async () => {
+      const { getMode, loadCase } = await import("@/lib/caseStore");
+      const demo = getMode() === "demo";
+
       if (fromUrl) {
-        setView({ kind: "ready", faith: fromUrl, law: lawForReligion(fromUrl) });
+        if (!cancelled) setView({ kind: "ready", faith: fromUrl, law: lawForReligion(fromUrl), demo });
         return;
       }
 
-      const { getMode, loadCase } = await import("@/lib/caseStore");
-
-      // The sample family is Hindu; in demo mode we say so rather than
+      // In demo mode we name the sample family's own faith rather than
       // reading a real case we must not touch.
-      if (getMode() === "demo") {
+      if (demo) {
         const { DEMO_CASE } = await import("@/lib/demo");
         const faith = DEMO_CASE.religion ?? null;
-        if (!cancelled) setView({ kind: "ready", faith, law: lawForReligion(faith) });
+        if (!cancelled) setView({ kind: "ready", faith, law: lawForReligion(faith), demo });
         return;
       }
 
@@ -60,7 +61,7 @@ export function LawSummary() {
       if (cancelled) return;
 
       const faith = record.religion ?? null;
-      setView({ kind: "ready", faith, law: lawForReligion(faith) });
+      setView({ kind: "ready", faith, law: lawForReligion(faith), demo });
     })();
 
     return () => {
@@ -83,6 +84,20 @@ export function LawSummary() {
       <p className="text-sm text-ink-muted">{faithLabel(view.faith)}</p>
       <h2 className="mt-2 text-xl">{view.law.law}</h2>
       <p className="mt-3 text-ink-soft">{view.law.note}</p>
+
+      {/*
+        In demo mode the heirs and shares underneath belong to the
+        sample family, who are Hindu — so if a visitor has just chosen
+        a different faith, this card and the one below it would appear
+        to contradict each other. Said plainly rather than hidden: the
+        alternative is a page that looks wrong for no visible reason.
+      */}
+      {view.demo && (
+        <p className="mt-5 rounded-2xl bg-clay-50 px-4 py-3 text-sm text-clay-700">
+          You are exploring as a sample family — a Hindu family from Pune. The law above is the one you just chose,
+          but the names and shares below are theirs. Start your own case to see this worked out for your family.
+        </p>
+      )}
     </Card>
   );
 }

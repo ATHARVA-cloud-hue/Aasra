@@ -209,11 +209,25 @@ export async function requestConsultation(lawyer: Lawyer): Promise<ConsultationO
   if (!supabase) return { result: "whatsapp", reason: "no-client" };
 
   try {
-    // Only a real, signed-in account can own a request. We do not sign
-    // anyone in from this button: being asked to log in because you
-    // tapped "talk to a lawyer" is exactly the wrong moment for it.
+    /*
+      Only a real, logged-in account can own a request, and the reason
+      is not security — it is that we have to be able to answer.
+
+      An anonymous session (the invisible one the case store makes so
+      Row Level Security has somebody to check) has no email and no
+      phone number. Recording a request against it would let us show
+      "one of us will be in touch" to somebody we have no way on earth
+      of reaching. So those go to WhatsApp instead, where the family is
+      holding the other end of the conversation.
+
+      We also do not sign anyone in from this button: being asked to
+      make an account because you tapped "talk to a lawyer" is exactly
+      the wrong moment for it.
+    */
     const { data: session } = await supabase.auth.getSession();
-    if (!session.session) return { result: "whatsapp", reason: "not-signed-in" };
+    const user = session.session?.user;
+    if (!user) return { result: "whatsapp", reason: "not-signed-in" };
+    if (user.is_anonymous) return { result: "whatsapp", reason: "anonymous" };
 
     // A demo lawyer has no row in the table to point at, so the
     // request goes through as a name only.
