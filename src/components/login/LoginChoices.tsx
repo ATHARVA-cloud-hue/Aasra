@@ -7,7 +7,13 @@ import { Card } from "@/components/ui/Card";
 import { FIRST_INTAKE_HREF } from "@/lib/journey";
 
 /*
-  THE TWO WAYS IN — and the switch that decides everything downstream.
+  THE TWO WAYS IN WITHOUT AN ACCOUNT — and the switch that decides
+  everything downstream.
+
+  Logging in with an email lives next door in EmailLogin. These are the
+  two choices for somebody who would rather not, which has to stay
+  possible: asking a person to make an account in the first hour after
+  a death is the fastest way to lose them.
 
   This is where "demo" and "real" are set, and it is the only place
   either is chosen. Every later page reads it with getMode():
@@ -40,10 +46,10 @@ export function LoginChoices() {
   return (
     <>
       <Card>
-        <h2 className="text-xl">This is my own family</h2>
+        <h2 className="text-xl">Carry on without an account</h2>
         <p className="mt-2 text-ink-soft">
-          Answer what you can and we will keep your place as you go. You can close this and come back whenever you
-          need to.
+          Answer what you can and we will keep your place as you go, on this device. You can close this and come back
+          whenever you need to — and make an account later if you want your case on your phone too.
         </p>
         <Button size="lg" className="mt-6 w-full sm:w-auto" disabled={going !== null} onClick={() => void choose("real")}>
           {going === "real" ? "One moment…" : "Start my family's case"}
@@ -64,19 +70,6 @@ export function LoginChoices() {
         >
           {going === "demo" ? "One moment…" : "Continue as a demo family"}
         </Button>
-      </Card>
-
-      <Card>
-        <h2 className="text-xl">Sign in with your phone</h2>
-        <p className="mt-2 text-ink-soft">
-          We will send a one-time code by SMS, so there is no password to remember.
-        </p>
-        <Button disabled className="mt-6 w-full sm:w-auto">
-          Coming soon
-        </Button>
-        <p className="mt-3 text-sm text-ink-muted">
-          Until this is switched on, your case is kept privately on this device and in your own browser session.
-        </p>
       </Card>
     </>
   );

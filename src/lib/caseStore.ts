@@ -89,6 +89,28 @@ function writeLocal(key: string, value: string): void {
   }
 }
 
+/*
+  Wipe everything this device remembers about a case.
+
+  Called when somebody logs out, and when a different account signs in
+  on the same browser. Both matter for the same reason: these keys hold
+  a dead person's name, their date of death and their family. On a
+  shared laptop — which is most laptops, in most Indian households —
+  the next person to open the app must not find any of it.
+
+  The four keys below are the complete list. If a fifth is ever added
+  above, it belongs here too.
+*/
+export function clearLocalCase(): void {
+  for (const key of [DRAFT_KEY, CASE_ID_KEY, CHOICES_KEY, MODE_KEY]) {
+    try {
+      if (typeof window !== "undefined") window.localStorage.removeItem(key);
+    } catch {
+      /* Private window — there was nothing stored to clear anyway. */
+    }
+  }
+}
+
 export function getMode(): Mode {
   return readLocal(MODE_KEY) === "demo" ? "demo" : "real";
 }
@@ -165,28 +187,57 @@ function mergeDraft(patch: CaseRecord): CaseRecord {
 // ---------------------------------------------------------------------------
 
 /*
-  Row Level Security needs to know who you are. Until phone sign-in is
-  switched on, we use Supabase "anonymous sign-in": the browser gets a
-  real user account with no phone and no password. That is enough for
-  the database to keep your case private from everyone else.
+  Row Level Security needs to know who you are, and there are two ways
+  it can find out. They are tried in this order, which is the whole
+  point of this function:
 
-  When phone sign-in arrives later, the same account simply gains a
-  phone number and the case comes with it.
+  1. A REAL ACCOUNT. Somebody who logged in with their email and a
+     one-time code — see src/lib/auth.ts. Their case follows them to
+     any device they log in on, which is the reason to have an account
+     at all.
 
-  Needs "Anonymous sign-ins" switched on in the Supabase dashboard
-  (Authentication → Sign In / Providers). Returns false if it is not.
+  2. ANONYMOUS SIGN-IN. The browser gets a user account with no email
+     and no password. Enough for the database to keep this case private
+     from everyone else, but it lives and dies with this browser.
+
+  The order matters and must not be reversed. If anonymous came first,
+  somebody who had just logged in would carry on writing to the
+  throwaway account instead of their own, and their case would vanish
+  the next time they opened the app on their phone.
+
+  Anonymous sign-in needs "Anonymous sign-ins" switched on in the
+  Supabase dashboard (Authentication → Sign In / Providers). When it is
+  off, this returns false and every caller falls back to this device —
+  which is a perfectly good outcome, not an error.
 */
+
+/*
+  Remembered after the first refusal. Without this, every save on a
+  project with anonymous sign-in switched off would make its own
+  pointless round trip and log its own identical error.
+*/
+let anonymousUnavailable = false;
+
 async function ensureSignedIn(): Promise<boolean> {
   const supabase = getSupabase();
   if (!supabase) return false;
 
   try {
+    // 1. A session we already have — a real account, or an anonymous
+    //    one from earlier in this browser.
     const { data } = await supabase.auth.getSession();
     if (data.session) return true;
 
+    // 2. Nobody at all. Fall back, unless we know it is switched off.
+    if (anonymousUnavailable) return false;
+
     const { error } = await supabase.auth.signInAnonymously();
     if (error) {
-      console.error("Anonymous sign-in failed:", error.message);
+      anonymousUnavailable = true;
+      console.error(
+        "Anonymous sign-in unavailable, keeping answers on this device instead:",
+        error.message,
+      );
       return false;
     }
     return true;

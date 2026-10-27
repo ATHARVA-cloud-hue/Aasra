@@ -1,14 +1,22 @@
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { EmailLogin } from "@/components/login/EmailLogin";
 import { LoginChoices } from "@/components/login/LoginChoices";
 
 /*
   WHERE THE JOURNEY STARTS.
 
-  The three ways in live in LoginChoices, which is also where a visitor
-  is marked as a real family or a demo one. Phone sign-in needs an SMS
-  provider set up in Supabase, so it is shown but switched off.
+  Three ways in, in the order they are worth to the person reading:
+
+  1. An email and a six-digit code (EmailLogin). The only one that
+     follows them to another device, so it goes first.
+  2. Carry on without an account, kept on this device.
+  3. Walk through with a sample family.
+
+  Two and three live in LoginChoices, which is also where a visitor is
+  marked as a real family or a demo one. All three still work with no
+  Supabase keys at all — the first simply explains itself instead.
 */
 export default function LoginPage() {
   return (
@@ -25,11 +33,16 @@ export default function LoginPage() {
           </p>
         </FadeIn>
 
-        <FadeIn delay={300} className="mt-10 space-y-5">
+        <FadeIn delay={300} className="mt-10">
+          <EmailLogin />
+        </FadeIn>
+
+        <FadeIn delay={450} className="mt-5 space-y-5">
+          <p className="text-center text-sm text-ink-muted">or, if you would rather not make an account</p>
           <LoginChoices />
         </FadeIn>
 
-        <FadeIn delay={450}>
+        <FadeIn delay={600}>
           <div className="mt-10 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Button href="/" variant="secondary" className="w-full sm:w-auto">
               Back to the start

@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { APP_NAME } from "@/lib/config";
 import { Container } from "@/components/ui/Container";
+import { HeaderAuth } from "@/components/layout/HeaderAuth";
 
-/* The quiet bar at the top of every page: name on the left, a lawyer on the right. */
+/*
+  The quiet bar at the top of every page: name on the left, the ways to
+  get help on the right.
+
+  It stays a server component. The only part that needs to know who is
+  signed in is HeaderAuth, which is a few lines of its own.
+*/
 export function SiteHeader() {
   return (
     <header className="py-5">
@@ -14,6 +21,7 @@ export function SiteHeader() {
 
         <nav aria-label="Get help" className="flex flex-wrap items-center gap-x-1 gap-y-1">
           <HeaderLink href="/lawyers">Talk to a lawyer</HeaderLink>
+          <HeaderAuth />
         </nav>
       </Container>
     </header>
