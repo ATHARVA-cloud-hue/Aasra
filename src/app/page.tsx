@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
 import { AskButton } from "@/components/chat/AskButton";
 import { ReligionChoice } from "@/components/religion/ReligionChoice";
+import { REGISTRIES } from "@/lib/registries";
 
 /*
   LANDING PAGE
@@ -25,6 +26,12 @@ const steps = [
     body: "A clear list of what each bank or insurer needs, with a lawyer checking anything legal.",
   },
 ];
+
+/*
+  Read off the registry list rather than typed out again, so the pills
+  on this page can never promise a portal the finder does not have.
+*/
+const portals = REGISTRIES.map((registry) => registry.where);
 
 const whoWeHelp = [
   { title: "There was no will", body: "Most families don't have one. That's okay — we start from wherever you are." },
@@ -93,6 +100,41 @@ export default function Home() {
         <Container width="narrow">
           <FadeIn>
             <ReligionChoice />
+          </FadeIn>
+        </Container>
+      </section>
+
+      {/* ---------- The official searches ---------- */}
+      <section className="py-10">
+        <Container width="narrow">
+          <FadeIn>
+            <Card>
+              <h2 className="text-xl">Find money your family may not know about</h2>
+              <p className="mt-2 text-ink-soft">
+                Forgotten bank accounts, unclaimed shares, provident fund, old insurance policies, a business in
+                their name. We open the right official page for each one and tell you what to look for.
+              </p>
+
+              <ul className="mt-5 flex flex-wrap gap-2" aria-label="The portals we take you to">
+                {portals.map((portal) => (
+                  <li
+                    key={portal}
+                    className="rounded-full bg-sage-50 px-3 py-1 text-sm text-sage-800"
+                  >
+                    {portal}
+                  </li>
+                ))}
+              </ul>
+
+              <Button href="/hidden-assets" className="mt-6 w-full sm:w-auto">
+                Find lost money · Government portals
+              </Button>
+
+              <p className="mt-4 text-sm text-ink-muted">
+                You do the searching, on the official site, in your own browser. We will never ask you for a
+                password, a PIN or a one-time code.
+              </p>
+            </Card>
           </FadeIn>
         </Container>
       </section>

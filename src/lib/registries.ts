@@ -91,6 +91,35 @@ export const REGISTRIES: Registry[] = [
     assetType: "Life insurance policy",
     placeholder: "For example: an LIC policy, number 4471xxxx, taken around 2005",
   },
+  {
+    id: "mca",
+    name: "Companies they were part of",
+    where: "MCA",
+    url: "https://www.mca.gov.in/",
+    what:
+      "The government's register of every company in India. Its free 'View Company / LLP Master Data' and " +
+      "'View Signatory Details' searches show which companies a person was a director or a signatory of.",
+    why:
+      "A shareholding in a small private company is the asset families miss most often, because there is no " +
+      "statement arriving in the post to remind anyone it exists. A company a relative set up decades ago is " +
+      "still on this register.",
+    assetType: "Company shareholding or directorship",
+    placeholder: "For example: he was a director of a private company registered in Pune, CIN on the certificate",
+  },
+  {
+    id: "udyam",
+    name: "A business in their name",
+    where: "Udyam (MSME)",
+    url: "https://udyamregistration.gov.in/",
+    what:
+      "The official registration portal for small and medium businesses. 'Print / Verify Udyam Registration " +
+      "Certificate' confirms a registration and shows what was registered.",
+    why:
+      "A registered business can hold a bank account, a GST number, a lease and unpaid invoices, and it carries " +
+      "obligations as well as value. Knowing it exists is what stops a family being surprised by it a year later.",
+    assetType: "Registered business (Udyam / MSME)",
+    placeholder: "For example: a Udyam registration for his tailoring shop, number on the certificate",
+  },
 ];
 
 /*

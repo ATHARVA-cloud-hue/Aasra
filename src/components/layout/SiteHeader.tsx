@@ -20,6 +20,9 @@ export function SiteHeader() {
         </Link>
 
         <nav aria-label="Get help" className="flex flex-wrap items-center gap-x-1 gap-y-1">
+          <HeaderLink href="/hidden-assets" label="Find lost money on the government portals">
+            Find lost money
+          </HeaderLink>
           <HeaderLink href="/lawyers">Talk to a lawyer</HeaderLink>
           <HeaderAuth />
         </nav>
@@ -28,10 +31,15 @@ export function SiteHeader() {
   );
 }
 
-function HeaderLink({ href, children }: { href: string; children: string }) {
+/*
+  `label` is for links whose visible text is shortened to fit the bar:
+  it gives a screen reader, and a long-press on a phone, the full thing.
+*/
+function HeaderLink({ href, children, label }: { href: string; children: string; label?: string }) {
   return (
     <Link
       href={href}
+      aria-label={label}
       className="rounded-full px-3 py-2 text-base text-ink-soft transition-colors duration-300 hover:bg-sage-50 hover:text-sage-800"
     >
       {children}

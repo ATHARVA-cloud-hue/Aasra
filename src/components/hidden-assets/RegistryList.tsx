@@ -71,8 +71,8 @@ export function RegistryList() {
       <Card>
         <h2 className="text-xl">How this part works</h2>
         <p className="mt-3 text-ink-soft">
-          Four official searches, each on a government or regulator site. You run them yourself, in your own browser —
-          we open the right page and tell you what to look for.
+          Each search below is on a government or regulator site. You run them yourself, in your own browser — we
+          open the right page and tell you what to look for.
         </p>
         <p className="mt-4 rounded-2xl bg-sage-50 px-4 py-3 text-sage-800">
           We will never ask you for a password, a PIN, or a one-time code. Nobody honest needs those to look for money
