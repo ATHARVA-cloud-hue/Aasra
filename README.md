@@ -57,11 +57,61 @@ A few steps, in this order. Everything still works without them — this is what
 
 Nothing here needs an SMTP server, a template or `{{ .Token }}`. If you later turn confirmations back on, Supabase's own default email is enough.
 
-**3. Nothing to do for `profiles`.** The table is created by step 1 and the app upserts a row after every sign-up and log-in. If the upsert fails for any reason, login still works — the row is our bookkeeping, not a gate.
+**3. Re-run the whole file after any update.** It is idempotent, and
+the payment columns on `consultations` (`payment_status`, `amount_inr`,
+`razorpay_order_id`, `razorpay_payment_id`, `paid_at`) are added by
+`add column if not exists` statements near the top. The `status` and
+`payment_status` check constraints are dropped and re-added, so running
+it again updates the rules rather than failing.
 
-**4. The lawyer panel.** The `lawyers` table starts empty, and an empty table makes `/lawyers` fall back to its five sample lawyers. Add real rows in Table Editor → `lawyers` → Insert row. `languages` is a text array, so enter it as `{Marathi,Hindi,English}`. Prices are whole rupees — leave one blank and the card says "On request" rather than ₹0.
+**4. Nothing to do for `profiles`.** The table is created by step 1 and the app upserts a row after every sign-up and log-in. If the upsert fails for any reason, login still works — the row is our bookkeeping, not a gate.
+
+**5. The lawyer panel.** The `lawyers` table starts empty, and an empty table makes `/lawyers` fall back to its five sample lawyers. Add real rows in Table Editor → `lawyers` → Insert row. `languages` is a text array, so enter it as `{Marathi,Hindi,English}`. Prices are whole rupees — leave one blank and the card says "On request" rather than ₹0.
 
 Nothing in the app can write to `lawyers`: there is no insert or update policy, deliberately. Rows go in through the dashboard, or from a server holding the service-role key.
+
+## Razorpay (consultation payments)
+
+Optional. Without it the payment step still works as a clearly labelled
+test payment, so the app demos end to end with nothing configured.
+
+**1. Get test keys.** Razorpay dashboard, with the **Test mode** switch
+on, then Settings, then API Keys. A test key id starts `rzp_test_`.
+Nothing in test mode moves real money.
+
+**2. Put them in `.env.local`:**
+
+```
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxx
+RAZORPAY_KEY_SECRET=xxxxxxxx
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxx
+```
+
+The secret has no `NEXT_PUBLIC_` prefix, so it never reaches a browser.
+It is the only thing that can verify a payment. The key id appears
+twice on purpose: once for the server, once for the checkout widget.
+
+**3. Pay with a test card.** Razorpay's test cards are in their docs;
+`4111 1111 1111 1111` with any future expiry and any CVV works.
+
+### What the code will not do
+
+- **The browser cannot say what it owes.** `/api/payments/create-order`
+  takes a lawyer id and reads the fee server-side. Sending an amount
+  with the request has no effect.
+- **Only the server can mark a payment paid**, and only when an HMAC of
+  `<order_id>|<payment_id>` keyed with the secret verifies. Compared
+  with `timingSafeEqual`, not `===`.
+- **The test path cannot be requested by a browser.** It is reachable
+  only when the server itself has no keys. Once real keys are set,
+  `{"demo": true}` is refused.
+
+Optionally set `SUPABASE_SERVICE_ROLE_KEY` as well. The verification
+route then writes the paid flag with that key, which bypasses Row Level
+Security and closes the one remaining gap: without it, a determined
+person could set `payment_status` on their own consultation row
+directly through Supabase. The blast radius is one unpaid request that
+a human reviews before any lawyer is booked.
 
 ## Build progress
 
@@ -71,22 +121,47 @@ Nothing in the app can write to `lawyers`: there is no insert or update policy, 
 - [x] Stage 4: AI document reading
 - [x] Stage 5: Heir result and checklist, per faith
 - [x] Stage 6: Hidden Asset Finder (RBI UDGAM, IEPF, EPFO, IRDAI, MCA, Udyam)
-- [ ] Stage 7: Case tracker and payment stub — tracker done, payment still a stub
+- [x] Stage 7: Case tracker and payment (Razorpay, test mode)
 - [x] Stage 8: Chat assistant, on every page
-- [ ] Stage 9: Hardening and demo polish
+- [x] Stage 9: Hardening and demo polish
 
 Also done: a `/lawyers` panel with prices and consultation requests, and
 `/law` — "what the law says for your family" — reachable straight from
 the landing page.
 
-Still outstanding, and worth knowing about:
+### Done since
 
-- **The WhatsApp number in `src/lib/config.ts` is a placeholder.** Every
-  WhatsApp fallback in the app points at a number that does not exist.
-  Search the project for `REPLACE BEFORE LAUNCH`.
-- **Payments.** Consultation prices are shown but nothing is charged.
-  `consultations` records the ask; there is no payment step.
-- **Document drafts.** Reading a document works; generating one does not.
+- **Payments work, in test mode.** A consultation fee is charged through
+  Razorpay. The fee is read server-side from the lawyer record, so the
+  browser cannot say what it owes, and a row is marked paid only after
+  an HMAC signature verifies on the server. With no Razorpay keys set
+  the step becomes a clearly labelled test payment, so the whole flow
+  is demoable with no account anywhere. See **Razorpay** below.
+
+- **The WhatsApp placeholder is gone.** The number comes from
+  `NEXT_PUBLIC_WHATSAPP_NUMBER`. With none configured the app shows no
+  WhatsApp link at all and offers the in-app consultation route
+  instead, so there is no way to reach a dead number.
+
+### Still outstanding
+
+- **Document drafts.** Reading a document works; generating one does
+  not. This is the one feature on the original list still missing.
+
+- **No automated tests.** Everything has been verified by hand, and the
+  payment routes were checked against a running server for forged,
+  wrong-length and valid signatures. The pure modules
+  (`lib/recovery/estimate.ts`, `lib/heirs/engine.ts`,
+  `lib/payments/razorpay.ts`) are straightforward to unit-test.
+
+- **Translations are not reviewed by a native speaker.** All five
+  languages are complete and key-for-key identical, but the legal and
+  financial wording should be read by someone fluent before launch.
+  The riskiest keys are `recovery.basis.*`, `heirs.*` and `payment.*`.
+
+- **Land record portals cover seven states.** The other twenty-four are
+  listed by name without a link, on purpose: see the comment at the top
+  of `src/lib/landRecords.ts`.
 
 ## Project layout
 

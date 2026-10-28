@@ -8,11 +8,11 @@
   ====================================================================
   WHAT USED TO BE HERE, AND WHY IT IS GONE
   ====================================================================
-  This file held a hardcoded fake number, "910000000000", with a
-  REPLACE BEFORE LAUNCH warning above it. Every WhatsApp fallback in
-  the app pointed at it. A family in distress who asked for a lawyer
-  and hit that fallback opened WhatsApp to a number that does not
-  exist, and got silence.
+  This file held a hardcoded fake number, "910000000000", under a
+  banner comment telling a future developer to replace it before
+  launch. Every WhatsApp fallback in the app pointed at it. A family in
+  distress who asked for a lawyer and hit that fallback opened WhatsApp
+  to a number that does not exist, and got silence.
 
   A comment telling a future developer to fix it was not a fix. The
   trap is now gone, in two parts:

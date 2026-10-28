@@ -25,6 +25,17 @@ import { getTranslations } from "next-intl/server";
   why, and the fix is to load the matching Noto font here.
 */
 
+/*
+  Describes the image for anyone whose reader announces a link preview
+  rather than showing it. Deliberately a plain description of what the
+  picture is, not a repeat of the title, which is announced separately.
+
+  A plain const rather than a translated string: this export cannot be
+  async, and the text is a description of an image rather than part of
+  the app's copy.
+*/
+export const alt = "Aasra: step-by-step help for families claiming a deceased person's assets";
+
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
