@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isRealAccount, signOut, useAuth } from "@/lib/auth";
@@ -28,6 +29,7 @@ import { isRealAccount, signOut, useAuth } from "@/lib/auth";
 */
 
 export function HeaderAuth() {
+  const t = useTranslations("nav");
   const auth = useAuth();
   const router = useRouter();
   const [going, setGoing] = useState(false);
@@ -52,7 +54,7 @@ export function HeaderAuth() {
         }}
         className="rounded-full px-3 py-2 text-base text-ink-soft transition-colors duration-300 hover:bg-sage-50 hover:text-sage-800 disabled:opacity-50"
       >
-        {going ? "Logging out…" : "Log out"}
+        {going ? t("loggingOut") : t("logOut")}
       </button>
     );
   }
@@ -60,12 +62,13 @@ export function HeaderAuth() {
   return (
     <Link
       href="/login"
-      aria-label="Log in or create account"
+      aria-label={t("logInFull")}
       className="rounded-full px-3 py-2 text-base text-ink-soft transition-colors duration-300 hover:bg-sage-50 hover:text-sage-800"
     >
       {/* The full wording on a laptop; just "Log in" where the header
           would otherwise wrap onto three lines on a phone. */}
-      Log in<span className="hidden sm:inline"> or create account</span>
+      {t("logIn")}
+      <span className="hidden sm:inline">{t("logInSuffix")}</span>
     </Link>
   );
 }

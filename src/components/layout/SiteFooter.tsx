@@ -1,31 +1,33 @@
 import Link from "next/link";
-import { APP_NAME, LEGAL_LINE } from "@/lib/config";
+import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/ui/Container";
 
-/* Footer on every page, carrying the "not a law firm" line from the brief. */
-export function SiteFooter() {
+/* Footer on every page, carrying the "not a law firm" line. */
+export async function SiteFooter() {
+  const t = await getTranslations();
+
   return (
     <footer className="mt-24 border-t border-line py-10 text-sm text-ink-muted">
       <Container className="space-y-5">
-        <nav aria-label="Footer">
+        <nav aria-label={t("footer.label")}>
           <ul className="flex flex-wrap gap-x-6 gap-y-2">
             <li>
-              <FooterLink href="/">Home</FooterLink>
+              <FooterLink href="/">{t("footer.home")}</FooterLink>
             </li>
             <li>
-              <FooterLink href="/login">Start here</FooterLink>
+              <FooterLink href="/login">{t("footer.startHere")}</FooterLink>
             </li>
             <li>
-              <FooterLink href="/plan-ahead">Plan ahead</FooterLink>
+              <FooterLink href="/plan-ahead">{t("footer.planAhead")}</FooterLink>
             </li>
             <li>
-              <FooterLink href="/lawyers">Talk to a lawyer</FooterLink>
+              <FooterLink href="/lawyers">{t("nav.talkToLawyer")}</FooterLink>
             </li>
           </ul>
         </nav>
 
-        <p className="max-w-2xl">{LEGAL_LINE}</p>
-        <p>© {APP_NAME} · Demo build. All names, families and numbers shown in the demo are fictional.</p>
+        <p className="max-w-2xl">{t("app.legalLine")}</p>
+        <p>{t("footer.copyright", { name: t("app.name") })}</p>
       </Container>
     </footer>
   );

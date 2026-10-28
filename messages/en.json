@@ -1,0 +1,32 @@
+{
+  "app": {
+    "name": "Aasra",
+    "tagline": "Step-by-step help for families claiming a deceased person's assets.",
+    "description": "A step-by-step guide for families in India claiming the deceased person's bank accounts, insurance, EPF, shares, and property.",
+    "legalLine": "Aasra is a technology and service platform, not a law firm. The guidance here is not legal advice. A lawyer reviews anything legal before it is filed."
+  },
+  "language": {
+    "label": "Language",
+    "choose": "Choose a language",
+    "current": "Current language: {name}"
+  },
+  "nav": {
+    "getHelp": "Get help",
+    "findLostMoney": "Find lost money",
+    "findLostMoneyFull": "Find lost money on the government portals",
+    "talkToLawyer": "Talk to a lawyer",
+    "logIn": "Log in",
+    "logInSuffix": " or create account",
+    "logInFull": "Log in or create account",
+    "logOut": "Log out",
+    "loggingOut": "Logging out",
+    "homeLabel": "{name} home"
+  },
+  "footer": {
+    "label": "Footer",
+    "home": "Home",
+    "startHere": "Start a claim",
+    "planAhead": "Plan ahead",
+    "copyright": "© {name}. Demo build. All names, families, and figures shown in the demo are fictional."
+  }
+}

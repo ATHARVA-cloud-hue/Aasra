@@ -1,29 +1,38 @@
 import Link from "next/link";
-import { APP_NAME } from "@/lib/config";
+import { getTranslations } from "next-intl/server";
 import { Container } from "@/components/ui/Container";
 import { HeaderAuth } from "@/components/layout/HeaderAuth";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
 /*
-  The quiet bar at the top of every page: name on the left, the ways to
-  get help on the right.
+  The bar at the top of every page: the name on one side, the ways to
+  get help on the other.
 
-  It stays a server component. The only part that needs to know who is
-  signed in is HeaderAuth, which is a few lines of its own.
+  It stays a server component. The two parts that cannot be are the
+  language menu and HeaderAuth, each of which is small and separate.
 */
-export function SiteHeader() {
+export async function SiteHeader() {
+  const t = await getTranslations();
+  const appName = t("app.name");
+
   return (
     <header className="py-5">
       <Container className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-        <Link href="/" className="flex items-center gap-2.5" aria-label={`${APP_NAME} home`}>
+        <Link
+          href="/"
+          className="flex items-center gap-2.5"
+          aria-label={t("nav.homeLabel", { name: appName })}
+        >
           <LeafMark />
-          <span className="font-serif text-2xl text-ink">{APP_NAME}</span>
+          <span className="font-serif text-2xl text-ink">{appName}</span>
         </Link>
 
-        <nav aria-label="Get help" className="flex flex-wrap items-center gap-x-1 gap-y-1">
-          <HeaderLink href="/hidden-assets" label="Find lost money on the government portals">
-            Find lost money
+        <nav aria-label={t("nav.getHelp")} className="flex flex-wrap items-center gap-x-1 gap-y-1">
+          <HeaderLink href="/hidden-assets" label={t("nav.findLostMoneyFull")}>
+            {t("nav.findLostMoney")}
           </HeaderLink>
-          <HeaderLink href="/lawyers">Talk to a lawyer</HeaderLink>
+          <HeaderLink href="/lawyers">{t("nav.talkToLawyer")}</HeaderLink>
+          <LanguageSwitcher />
           <HeaderAuth />
         </nav>
       </Container>
