@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { whatsappLink } from "@/lib/config";
+import { hasWhatsapp, whatsappLink } from "@/lib/config";
+import { PaymentStep } from "@/components/lawyers/PaymentStep";
 import {
   isDemoLawyer,
   loadLawyers,
@@ -37,8 +38,18 @@ import {
 type Status =
   | { kind: "idle" }
   | { kind: "sending" }
-  | { kind: "saved" }
-  | { kind: "whatsapp"; href: string };
+  /* Recorded. consultationId is what the payment step pays against. */
+  | { kind: "saved"; consultationId?: string }
+  /* A real number is configured, so WhatsApp is a usable way through. */
+  | { kind: "whatsapp"; href: string }
+  /*
+    No WhatsApp number is configured, so there is no link to show. Which
+    message to give depends on WHY the request could not be recorded:
+    somebody not signed in needs an account, which is a thing they can
+    act on; anything else is ours to fix, and says so.
+  */
+  | { kind: "needsAccount" }
+  | { kind: "contactSoon" };
 
 type View = { kind: "loading" } | { kind: "ready"; lawyers: Lawyer[]; from: LawyerSource };
 
@@ -76,14 +87,25 @@ export function LawyerList() {
     const outcome = await requestConsultation(lawyer);
 
     if (outcome.result === "saved") {
-      setStatus((current) => ({ ...current, [lawyer.id]: { kind: "saved" } }));
+      setStatus((current) => ({
+        ...current,
+        [lawyer.id]: { kind: "saved", consultationId: outcome.consultationId },
+      }));
       return;
     }
 
     /*
-      Falling back to WhatsApp. The link is handed back rather than
-      calling window.open, because a popup the browser blocks would
-      look to the family like the button simply did nothing.
+      The request could not be recorded. What happens next depends on
+      whether there is a human on the other end of a WhatsApp number.
+
+      With a number: hand back the link rather than calling
+      window.open, because a popup the browser blocks would look to the
+      family like the button simply did nothing.
+
+      Without one: say something true and useful instead of opening
+      WhatsApp to a number that does not answer. Somebody who is not
+      signed in is told that an account lets them request directly,
+      which is the in-app route and is a thing they can act on.
     */
     const href = whatsappLink(
       t("whatsapp.consultation", {
@@ -91,7 +113,14 @@ export function LawyerList() {
         city: lawyer.city ? t("whatsapp.inCity", { city: lawyer.city }) : "",
       }),
     );
-    setStatus((current) => ({ ...current, [lawyer.id]: { kind: "whatsapp", href } }));
+
+    const next: Status = href
+      ? { kind: "whatsapp", href }
+      : outcome.reason === "not-signed-in" || outcome.reason === "anonymous"
+        ? { kind: "needsAccount" }
+        : { kind: "contactSoon" };
+
+    setStatus((current) => ({ ...current, [lawyer.id]: next }));
   }
 
   if (view.kind === "loading") {
@@ -158,14 +187,26 @@ export function LawyerList() {
           <p className="mt-3 text-ink-soft">
             {t("emptyBody", { specialty: specialtyLabel(filter) })}
           </p>
-          <Button
-            href={whatsappLink(t("whatsapp.specialty", { specialty: specialtyLabel(filter) }))}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 w-full sm:w-auto"
-          >
-            {t("emptyButton")}
-          </Button>
+          {/*
+            Only offered when there is actually a number behind it.
+            Otherwise the in-app route, which always works.
+          */}
+          {hasWhatsapp() ? (
+            <Button
+              href={
+                whatsappLink(t("whatsapp.specialty", { specialty: specialtyLabel(filter) })) ?? "#"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 w-full sm:w-auto"
+            >
+              {t("emptyButton")}
+            </Button>
+          ) : (
+            <Button href="/login" className="mt-6 w-full sm:w-auto">
+              {t("emptyButtonInApp")}
+            </Button>
+          )}
         </Card>
       ) : (
         <ul className="mt-5 space-y-5">
@@ -249,6 +290,10 @@ export function LawyerList() {
             >
               {t("messageAbout", { name: lawyer.name.replace(/^Adv\.\s*/, "") })}
             </Button>
+          ) : status.kind === "needsAccount" ? (
+            <Button href="/login" className="w-full sm:w-auto">
+              {t("createAccountToRequest")}
+            </Button>
           ) : (
             <Button
               onClick={onAsk}
@@ -265,6 +310,15 @@ export function LawyerList() {
 
           <RequestNote status={status} />
         </div>
+
+        {/*
+          The payment step appears only once a consultation has actually
+          been recorded, so nobody is asked for money before anything
+          has been booked.
+        */}
+        {status.kind === "saved" && (
+          <PaymentStep lawyer={lawyer} consultationId={status.consultationId} />
+        )}
       </Card>
     );
   }
@@ -284,6 +338,22 @@ export function LawyerList() {
       return (
         <p className="text-sm text-ink-muted" role="status">
           {t("whatsappNote")}
+        </p>
+      );
+    }
+
+    if (status.kind === "needsAccount") {
+      return (
+        <p className="text-sm text-ink-soft" role="status">
+          {t("needsAccountNote")}
+        </p>
+      );
+    }
+
+    if (status.kind === "contactSoon") {
+      return (
+        <p className="text-sm text-ink-soft" role="status">
+          {t("contactSoonNote")}
         </p>
       );
     }

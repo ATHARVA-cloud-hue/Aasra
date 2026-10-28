@@ -609,7 +609,11 @@
       "demo-3": "Handles probate and letters of administration under the Indian Succession Act, and the extra steps a family living outside India runs into. Takes calls across time zones.",
       "demo-4": "Handles ancestral land, jointly held flats, and cases where one relative will not sign. Will say plainly when a dispute is not worth fighting.",
       "demo-5": "A good first conversation if you do not yet know what kind of help you need. Covers nominee claims, EPF, and insurance, and will say honestly when no lawyer is needed at all."
-    }
+    },
+    "needsAccountNote": "Create an account and the request is recorded against your case, so a lawyer can be given the details without you explaining everything again.",
+    "contactSoonNote": "The request could not be recorded just now. Nothing is lost: try again in a moment, or come back to this page later.",
+    "createAccountToRequest": "Create an account to request this",
+    "emptyButtonInApp": "Create an account and ask"
   },
   "login": {
     "title": "Start your claim",
@@ -878,5 +882,40 @@
       "tamilNadu": "Choose the district, taluk, and village, then search the patta or chitta by patta number or by survey number. A subdivision goes in its own field.",
       "telangana": "Search the details of land, the encumbrance certificate, and registered document details. Succession applications are made on the same portal."
     }
+  },
+  "payment": {
+    "brandName": "Aasra",
+    "description": "Consultation with {name}",
+    "payFee": "Pay the consultation fee of {amount}",
+    "opening": "Opening the payment window",
+    "waiting": "Waiting for the payment",
+    "verifying": "Checking the payment",
+    "note": "The fee is set by the lawyer and is shown before anything is charged. Payment is handled by Razorpay, and this app never sees or stores a card number.",
+    "paidTitle": "The consultation fee is paid",
+    "paidSimulated": "Test payment recorded. No real money was charged.",
+    "paidAmount": "Amount: {amount}",
+    "paidNotStored": "The payment is confirmed. The record in your case is still catching up, and will appear shortly.",
+    "testTitle": "Test payment, no gateway configured",
+    "testBody": "No payment gateway is set up in this copy of the app, so nothing can be charged. Use the button below to record the fee as paid and see the rest of the flow.",
+    "testBodyDegraded": "The payment gateway could not be reached just now, so nothing can be charged. Use the button below to record the fee as paid and continue. Nothing real is charged.",
+    "testAmount": "The fee would be {amount}.",
+    "simulate": "Record a test payment",
+    "cancelled": "The payment window was closed, so nothing was charged. You can try again whenever you are ready.",
+    "verifyFailed": "The payment could not be confirmed, so nothing has been marked paid. If money has left your account it will be returned automatically. Try again, or talk to a lawyer about it.",
+    "setupFailed": "The payment could not be started just now. Try again in a moment.",
+    "tryAgain": "Try again"
+  },
+  "consultations": {
+    "title": "Lawyers you have asked for",
+    "loading": "Looking for your consultation requests",
+    "emptyBody": "No consultation has been requested yet. That is normal, and there is no hurry. When you want a lawyer to look at the case, pick one from the panel and ask.",
+    "emptyButton": "See the lawyers",
+    "demoNotice": "A sample request, shown with a fictional lawyer.",
+    "aLawyer": "A lawyer",
+    "fee": "Fee {amount}",
+    "requestedOn": "Requested {date}",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "note": "A lawyer contacts you directly once the fee is paid. Nothing legal is filed before a lawyer has read the case."
   }
 }

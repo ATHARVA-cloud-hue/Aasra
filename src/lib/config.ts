@@ -1,40 +1,84 @@
 /*
   App-wide settings that are NOT secret.
-  Change the product name or contact details here and they
-  update everywhere in the app.
 */
 
 /*
-  ⚠️  REPLACE BEFORE LAUNCH  ⚠️
+  THE WHATSAPP CONTACT.
 
-  This is a FAKE placeholder number. Every WhatsApp fallback in the app
-  points at it: the "I would rather just talk to someone" link on the
-  lawyers page, and — more importantly — the fallback that fires when a
-  consultation request cannot be recorded.
+  ====================================================================
+  WHAT USED TO BE HERE, AND WHY IT IS GONE
+  ====================================================================
+  This file held a hardcoded fake number, "910000000000", with a
+  REPLACE BEFORE LAUNCH warning above it. Every WhatsApp fallback in
+  the app pointed at it. A family in distress who asked for a lawyer
+  and hit that fallback opened WhatsApp to a number that does not
+  exist, and got silence.
 
-  Right now, a family in real distress who asks for a lawyer and hits
-  that fallback opens WhatsApp to a number that does not exist. That is
-  the single worst thing in this codebase to leave unfixed, because the
-  people most likely to tap it are the ones least able to cope with
-  being ignored.
+  A comment telling a future developer to fix it was not a fix. The
+  trap is now gone, in two parts:
 
-  To fix: put the real helpline below in both places. wa.me links need
-  the country code, with no "+", spaces or dashes — so a Mumbai number
-  +91 98200 12345 becomes "919820012345". Keep WHATSAPP_DISPLAY in the
-  format a person would recognise, and drop the "(demo)" from it.
+  1. The number comes from NEXT_PUBLIC_WHATSAPP_NUMBER.
 
-  Then search the project for "REPLACE BEFORE LAUNCH" to be sure this is
-  the only placeholder left.
+  2. When that is not set, hasWhatsapp() is false and the app does not
+     show a WhatsApp link at all. It offers the in-app consultation
+     flow instead. No dead link can be rendered, because there is
+     nothing to render it from.
+
+  So an unconfigured deployment degrades to "contact us through the
+  app", which works, rather than to a number that rings nowhere.
 */
-export const WHATSAPP_NUMBER = "910000000000";
-export const WHATSAPP_DISPLAY = "+91 00000 00000 (demo)";
 
 /*
+  wa.me needs the country code with no "+", spaces or dashes, so
+  +91 98200 12345 becomes 919820012345. Anything else is discarded
+  rather than used, because a malformed wa.me link fails silently in a
+  way the family would read as being ignored.
+*/
+const configuredNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "").replace(/[^\d]/g, "");
+
+/*
+  A plausible number is 10 to 15 digits (E.164 allows 15). The old
+  placeholder, 910000000000, is explicitly rejected: it is the right
+  length and would otherwise pass, and leaving the trap one typo away
+  from returning is not worth the three lines it costs to close.
+*/
+const PLACEHOLDERS = new Set(["910000000000", "911234567890", "919999999999"]);
+
+const looksReal =
+  configuredNumber.length >= 10 &&
+  configuredNumber.length <= 15 &&
+  !PLACEHOLDERS.has(configuredNumber) &&
+  // All one digit repeated is not a phone number.
+  !/^(\d)\1+$/.test(configuredNumber);
+
+export const WHATSAPP_NUMBER = looksReal ? configuredNumber : "";
+
+/** How the number is shown to a person. Empty when there is none. */
+export const WHATSAPP_DISPLAY = looksReal
+  ? (process.env.NEXT_PUBLIC_WHATSAPP_DISPLAY ?? configuredNumber)
+  : "";
+
+/*
+  Ask this BEFORE rendering any WhatsApp link or button. False means
+  there is no contact number, and the caller should offer the in-app
+  consultation route instead.
+*/
+export function hasWhatsapp(): boolean {
+  return WHATSAPP_NUMBER !== "";
+}
+
+/*
+  A wa.me link, or null when no number is configured.
+
+  Returning null rather than a broken URL is the point: a caller has to
+  handle the "no number" case to get anything out of this function, so
+  a dead link cannot be produced by forgetting to check.
+
   The message is required, never defaulted. A default would be one
   English sentence that no dictionary covers, sent on behalf of
   somebody reading the page in Urdu.
 */
-export function whatsappLink(message: string) {
+export function whatsappLink(message: string): string | null {
+  if (!hasWhatsapp()) return null;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
-

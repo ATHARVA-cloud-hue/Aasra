@@ -247,6 +247,55 @@ create index if not exists consultations_user_id_idx on public.consultations (us
 
 
 -- ----------------------------------------------------------------------------
+--  7b. PAYMENT on a consultation.
+--
+--      Added after the consultations table shipped, so these go on as
+--      separate "add column if not exists" statements. Safe to run again
+--      on a database that already has rows in it.
+--
+--      amount_inr is a SNAPSHOT of the fee at the moment the family
+--      asked, in whole rupees. It is stored rather than read back from
+--      the lawyers table on demand, because a lawyer raising their fee
+--      next year must not change what a family was quoted and charged.
+-- ----------------------------------------------------------------------------
+alter table public.consultations
+  add column if not exists payment_status text not null default 'unpaid';
+
+alter table public.consultations
+  add column if not exists amount_inr integer;
+
+-- Razorpay's own identifiers, kept for reconciliation against their
+-- dashboard. Neither is a secret.
+alter table public.consultations
+  add column if not exists razorpay_order_id text;
+
+alter table public.consultations
+  add column if not exists razorpay_payment_id text;
+
+alter table public.consultations
+  add column if not exists paid_at timestamptz;
+
+-- The three states a payment can be in. Dropped and re-added rather
+-- than created once, so re-running this file updates the rule instead
+-- of failing on a constraint that already exists.
+alter table public.consultations
+  drop constraint if exists consultations_payment_status_check;
+
+alter table public.consultations
+  add constraint consultations_payment_status_check
+  check (payment_status in ('unpaid', 'paid', 'failed'));
+
+-- "confirmed" is new: it is what a consultation becomes once the fee has
+-- actually been paid and verified. The original list did not have it.
+alter table public.consultations
+  drop constraint if exists consultations_status_check;
+
+alter table public.consultations
+  add constraint consultations_status_check
+  check (status in ('requested', 'confirmed', 'contacted', 'scheduled', 'closed'));
+
+
+-- ----------------------------------------------------------------------------
 --  8. PROFILES — one row per account, kept in step after sign-up and log-in.
 --     auth.users already holds the email; this is the copy our own tables
 --     are allowed to join against, plus a name to address someone by.
@@ -492,6 +541,30 @@ create policy "read own consultations" on public.consultations
 
 create policy "create own consultations" on public.consultations
   for insert to authenticated
+  with check (user_id = (select auth.uid()));
+
+/*
+  Updating a consultation.
+
+  Needed because the payment verification route writes payment_status
+  back onto the row. The route forwards the signed-in family's own
+  access token, so this policy is what lets that write land.
+
+  WORTH KNOWING: this policy means a determined person could call
+  Supabase directly and set payment_status on their OWN consultation
+  without paying. The amount is small and the row is theirs, so the
+  blast radius is one unpaid consultation request, which a human sees
+  before any lawyer is booked.
+
+  To close it properly, set SUPABASE_SERVICE_ROLE_KEY. The route then
+  writes with that key instead and this policy can be dropped, leaving
+  no client-reachable way to mark anything paid.
+*/
+drop policy if exists "update own consultations" on public.consultations;
+
+create policy "update own consultations" on public.consultations
+  for update to authenticated
+  using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
 
 

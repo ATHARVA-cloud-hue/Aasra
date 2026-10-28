@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { whatsappLink } from "@/lib/config";
+import { hasWhatsapp, whatsappLink } from "@/lib/config";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { FadeIn } from "@/components/ui/FadeIn";
@@ -39,15 +39,22 @@ export default async function LawyersPage() {
             <Button href="/" variant="secondary" className="w-full sm:w-auto">
               {t("common.backToStart")}
             </Button>
-            <Button
-              href={whatsappLink(t("lawyers.whatsapp.unsure"))}
-              variant="quiet"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto"
-            >
-              {t("lawyers.notSure")}
-            </Button>
+            {/*
+              Only shown when a WhatsApp number is actually configured.
+              With none, there is nothing to link to, so the link is not
+              rendered at all rather than pointing nowhere.
+            */}
+            {hasWhatsapp() && (
+              <Button
+                href={whatsappLink(t("lawyers.whatsapp.unsure")) ?? "#"}
+                variant="quiet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
+              >
+                {t("lawyers.notSure")}
+              </Button>
+            )}
           </div>
         </FadeIn>
 

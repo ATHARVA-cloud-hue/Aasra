@@ -453,6 +453,55 @@ export async function loadAssets(): Promise<AssetRow[]> {
   }
 }
 
+/** One consultation request, as the case tracker shows it. */
+export type ConsultationRow = {
+  id: string;
+  lawyer_name: string | null;
+  status: string | null;
+  payment_status: string | null;
+  amount_inr: number | null;
+  created_at: string | null;
+};
+
+/*
+  The family's consultation requests, newest first.
+
+  Returns an empty list rather than failing, so the case tracker can
+  always render. Row Level Security already limits this to the signed-in
+  family's own rows, which is why there is no filter here.
+*/
+export async function loadConsultations(): Promise<ConsultationRow[]> {
+  if (!hasSupabaseKeys) return [];
+
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  try {
+    /*
+      No ensureCaseId() call. A consultation belongs to the account, not
+      to a case, and asking for a case id here would create an empty
+      case row for somebody who only ever asked to speak to a lawyer.
+    */
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return [];
+
+    const { data: rows, error } = await supabase
+      .from("consultations")
+      .select("id, lawyer_name, status, payment_status, amount_inr, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Consultation read failed:", error.message);
+      return [];
+    }
+
+    return (rows ?? []) as ConsultationRow[];
+  } catch (error) {
+    console.error("Consultation read failed:", error instanceof Error ? error.message : error);
+    return [];
+  }
+}
+
 export async function loadCase(): Promise<LoadedCase> {
   const draft = readDraft();
 

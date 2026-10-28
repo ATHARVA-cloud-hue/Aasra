@@ -212,6 +212,14 @@ export type ConsultationOutcome = {
   result: "saved" | "whatsapp";
   /** A short code for the console. Never shown to the family. */
   reason?: string;
+  /*
+    The new row's id, when one was created. The payment step needs it
+    so a verified payment can be written back against the right
+    request. Absent on the WhatsApp path, where there is no row.
+  */
+  consultationId?: string;
+  /** The fee quoted, in whole rupees, so the screen can show it. */
+  amountInr?: number | null;
 };
 
 export async function requestConsultation(lawyer: Lawyer): Promise<ConsultationOutcome> {
@@ -245,21 +253,40 @@ export async function requestConsultation(lawyer: Lawyer): Promise<ConsultationO
     // request goes through as a name only.
     const { rememberedCaseId } = await import("@/lib/caseStore");
 
-    const { error } = await supabase.from("consultations").insert({
-      lawyer_id: isDemoLawyer(lawyer) ? null : lawyer.id,
-      // Kept as plain text too, so the request still makes sense if the
-      // lawyer later leaves the panel.
-      lawyer_name: lawyer.name,
-      case_id: rememberedCaseId(),
-      kind: "consultation",
-    });
+    const { data, error } = await supabase
+      .from("consultations")
+      .insert({
+        lawyer_id: isDemoLawyer(lawyer) ? null : lawyer.id,
+        // Kept as plain text too, so the request still makes sense if the
+        // lawyer later leaves the panel.
+        lawyer_name: lawyer.name,
+        case_id: rememberedCaseId(),
+        kind: "consultation",
+        /*
+          A snapshot of the fee as quoted on the card just now. Stored
+          rather than looked up later, so a lawyer raising their price
+          next year cannot change what this family was quoted.
+
+          The amount actually CHARGED is re-read on the server, from
+          the lawyer record, and never from here. This column is the
+          record of the quote, not the instruction to charge.
+        */
+        amount_inr: lawyer.consultation_price_inr,
+        payment_status: "unpaid",
+      })
+      .select("id")
+      .single();
 
     if (error) {
       console.error("Consultation request failed:", error.message);
       return { result: "whatsapp", reason: error.code ?? "insert-failed" };
     }
 
-    return { result: "saved" };
+    return {
+      result: "saved",
+      consultationId: typeof data?.id === "string" ? data.id : undefined,
+      amountInr: lawyer.consultation_price_inr,
+    };
   } catch (error) {
     console.error("Consultation request failed:", error instanceof Error ? error.message : error);
     return { result: "whatsapp", reason: "exception" };

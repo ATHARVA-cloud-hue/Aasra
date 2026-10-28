@@ -5,6 +5,7 @@ import { StepPage } from "@/components/layout/StepPage";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { CaseSummary } from "@/components/case/CaseSummary";
+import { ConsultationList } from "@/components/case/ConsultationList";
 
 /*
   THE CASE TRACKER — the last step, and the page a family returns to.
@@ -34,6 +35,9 @@ export default async function CasePage() {
       footnote={t("case.footnote")}
     >
       <CaseSummary />
+
+      {/* Consultation requests, and whether each fee is paid. */}
+      <ConsultationList />
 
       {/*
         The recovery estimate, offered prominently here because this is
