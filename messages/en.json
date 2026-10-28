@@ -20,7 +20,9 @@
     "logInFull": "Log in or create account",
     "logOut": "Log out",
     "loggingOut": "Logging out",
-    "homeLabel": "{name} home"
+    "homeLabel": "{name} home",
+    "recovery": "What can be recovered",
+    "recoveryFull": "See what the family may be able to recover"
   },
   "footer": {
     "label": "Footer",
@@ -271,8 +273,34 @@
             "note": "This includes a shop, a firm, a company, or freelance work. A business is handled differently from a salary."
           }
         }
+      },
+      "9": {
+        "question": "Four optional questions",
+        "help": "Every question on this page can be skipped. Each answer makes the recovery estimate more exact, and the estimate still works without any of them.",
+        "fields": {
+          "employed_at_death": {
+            "label": "Was the deceased person employed at the time of death?",
+            "note": "If the answer is yes, provident fund, death insurance under EDLI, and gratuity may all be due to the family. Many families are never told about the death insurance."
+          },
+          "years_of_service": {
+            "label": "Roughly how many years did the deceased person work?",
+            "placeholder": "For example, 28",
+            "note": "An approximate number is useful. Used together with the salary below to estimate the provident fund and the gratuity."
+          },
+          "last_monthly_salary": {
+            "label": "Approximate last monthly salary, in rupees",
+            "placeholder": "For example, 32000",
+            "note": "Enter the monthly figure, not the annual one. A payslip or a bank statement will show it."
+          },
+          "property_state": {
+            "label": "In which state is any property or land likely to be?",
+            "note": "This picks the correct state land record portal. Leave it blank if there is no property, or if the state is not known."
+          }
+        }
       }
-    }
+    },
+    "optional": "(optional)",
+    "notAnswered": "Not answered"
   },
   "documents": {
     "backToQuestions": "Back to the questions",
@@ -528,7 +556,10 @@
     "helpTitle": "When you need help",
     "helpBody": "A lawyer can continue from where this page leaves off. You do not have to explain everything again.",
     "planAhead": "Plan ahead for your own family",
-    "child": "Child"
+    "child": "Child",
+    "recoveryTitle": "What the family may be able to recover",
+    "recoveryBody": "See an estimated range based on everything entered so far, with the full calculation and the official source for each figure.",
+    "recoveryButton": "See the recovery estimate"
   },
   "lawyers": {
     "title": "Talk to a lawyer",
@@ -737,6 +768,115 @@
         "place": "Shares and mutual funds",
         "needs": "A transmission request, death certificate, and a notarised affidavit."
       }
+    }
+  },
+  "recovery": {
+    "title": "What the family may be able to recover",
+    "lead": "An estimated range, built from the statutory formulas and from the figures entered so far. Every number on this page can be opened up to show exactly how it was reached.",
+    "homeBody": "Answer a few questions and this app estimates what the family may be able to recover, with the calculation and the official source shown for every figure.",
+    "homeButton": "See the recovery estimate",
+    "homeHonesty": "An estimate from what you enter. This app cannot look up a real balance, and no app can.",
+    "loading": "Working out the estimate",
+    "demoNotice": "This is a sample family, so the figures below are worked out from sample answers.",
+    "headlineLabel": "Estimated amount the family may be able to recover",
+    "headlineHonesty": "This is an estimate based on what you have entered, not a confirmed balance. No app can look up a real bank balance, policy, or land record. Open the calculation below to see every figure and its source.",
+    "nothingCountedTitle": "Not enough entered yet to estimate an amount",
+    "nothingCountedBody": "Answer the questions about employment, salary, and the accounts already known about, and this page fills in with a range. The places worth searching are listed below in the meantime.",
+    "answerQuestions": "Answer the questions",
+    "howCalculated": "How is this calculated?",
+    "countedTitle": "What is counted in the range",
+    "flaggedTitle": "Worth checking, with no amount counted",
+    "flaggedBody": "No rupee figure is counted for these, because no honest figure can be produced without searching. Each one is a real place where money is often found, and the portal to search is linked below.",
+    "workingsTitle": "Every figure, and where it comes from",
+    "workingsIntro": "Each line below shows its range, the arithmetic in plain words, how firm it is, and the official source. Nothing on this page is a guess that cannot be traced back.",
+    "workingsFootnote": "The same answers always produce the same figures. Nothing here is randomised, and no figure is a particular person's confirmed balance.",
+    "assumptionsTitle": "Assumptions made",
+    "worthChecking": "Worth checking",
+    "source": "Official source",
+    "contextTitle": "Why searching is worth the effort",
+    "contextBody": "₹{crore} crore of unclaimed bank deposits is held in the Reserve Bank of India's Depositor Education and Awareness Fund. A balance reaches that fund after {years} years untouched, and it remains claimable from the bank that held it. Most families never learn about an account opened decades ago in another city.",
+    "contextSource": "Source:",
+    "pursueTitle": "Where to pursue each amount",
+    "pursueBody": "Each search below is on a government or regulator site. Run each one yourself, in your own browser. This app never asks for a password, a PIN, or a one-time code.",
+    "openPortals": "Open the government portals",
+    "backToCase": "Back to your case",
+    "askAbout": "Ask a question about this estimate",
+    "categories": {
+      "reportedDeposits": "Amounts you entered",
+      "edli": "Death insurance (EDLI)",
+      "epf": "Provident fund (EPF and EPS)",
+      "gratuity": "Gratuity and final dues",
+      "unclaimedDeposits": "Unclaimed bank deposits (RBI)",
+      "shares": "Shares and dividends (IEPF)",
+      "lifeInsurance": "Life insurance",
+      "property": "Property and land"
+    },
+    "basis": {
+      "reportedDeposits": "Read from the amounts you entered: {amounts}. Counted at face value and not adjusted, because these are figures you provided rather than figures this app worked out.",
+      "edliRange": "Every EPF member in employment at death is covered by the EDLI scheme, at no cost to the employee. The payout is held between the statutory floor of {min} and the statutory ceiling of {max}. The exact figure depends on the average provident fund balance of the last twelve months, which only EPFO can confirm.",
+      "edliFromSalary": "The EDLI payout is {multiple} times average monthly wages, with wages counted up to the ceiling of {ceiling}, plus a balance-linked part capped at {bonusCap}. Using the salary entered, wages count as {cappedWages}. The result is then held between the statutory floor of {min} and the ceiling of {max}.",
+      "epfFromSalaryAndYears": "Estimated from the salary of {salary} a month across {years} years of service. The lower figure is the legal minimum: {employeeRate}% of the statutory wage ceiling of {ceiling} each month, which is all an employer is required to contribute on. The higher figure assumes contributions on the full salary from both the employee and the employer, {totalRate}% in all, which many employers in the organised sector do. The range is wide because only EPFO can say which applied. No interest is added, so the real balance is likely to be higher than either figure.",
+      "epfDefaultRange": "Employment is known, but no salary or length of service was entered, so this is a wide placeholder rather than a calculation. Enter an approximate salary and number of years and this line becomes a real estimate.",
+      "gratuityFormula": "The statutory formula is {days} divided by {divisor}, multiplied by the last monthly wages, multiplied by the completed years of service. Here that is {days}/{divisor} of {salary} across {years} years, which comes to about {point}. A band of {band}% either side is shown because gratuity is calculated on basic wages and dearness allowance rather than on the full salary. The statutory maximum is {max}.",
+      "unclaimedDepositsFlag": "A bank balance untouched for {years} years is moved to the Reserve Bank of India's Depositor Education and Awareness Fund, which holds ₹{crore} crore nationally. Whether the deceased person has anything there can only be found by searching the RBI UDGAM portal. No amount is counted here, because no amount can honestly be assumed.",
+      "sharesFlag": "A dividend left unclaimed for {years} years, and the shares it relates to, are transferred to the IEPF and can be claimed back. Paper share certificates from the 1980s and 1990s are the holdings families miss most often, because nothing arrives in the post as a reminder. No amount is counted, because only a search can show whether anything is held.",
+      "lifeInsuranceFlag": "A policy number is not a sum assured, so no amount is counted here. If a figure was entered it has already been counted once under the amounts you entered. If the paperwork cannot be found, the IRDAI site explains how to trace a policy and lists every licensed insurer.",
+      "propertyFlag": "No rupee value is estimated for property or land, deliberately. The value of a plot depends on its exact location, its access, its title, and whether it is agricultural, and no honest figure can be produced from a state name alone. The state land record portal is linked below instead."
+    },
+    "assumptions": {
+      "estimateNotBalance": "Every figure here is an estimate or a statutory entitlement, never a confirmed balance. This app does not and cannot read a real bank account, policy, or land record.",
+      "reportedAtFaceValue": "Amounts you entered are counted exactly as entered, with nothing added for interest or growth.",
+      "edliRequiresMembership": "The death insurance figure assumes the deceased person was an EPF member in employment at the time of death. EPFO confirms membership.",
+      "epfNoInterest": "The provident fund estimate counts contributions only and adds no interest, so the real balance is likely to be higher than the range shown.",
+      "epfDefaultIsPlaceholder": "The provident fund range is a placeholder until an approximate salary or length of service is entered.",
+      "gratuityDeathWaiver": "Gratuity normally requires five years of continuous service, but that requirement does not apply where the employment ended in the death of the employee. Gratuity is therefore included however short the service was.",
+      "gratuityOnBasicWages": "Gratuity is calculated on basic wages and dearness allowance rather than on the full salary including allowances, which is why a band is shown rather than a single figure.",
+      "insuranceNotDoubleCounted": "An insurance amount you entered is counted once, under the amounts you entered, and is not counted a second time under life insurance.",
+      "propertyNotValued": "Property and land are not given a rupee value, because no defensible figure can be produced without a valuation.",
+      "epfCeilingBrackets": "The provident fund range is wide on purpose. Contributions are compulsory only on wages up to the statutory ceiling, and contributing on the full salary is common but not required, so the two ends of the range cover both practices. The provident fund passbook on the EPFO portal shows which one applied."
+    },
+    "notes": {
+      "gratuityNeedsSalary": "Gratuity is not estimated yet. Enter an approximate last monthly salary and number of years worked, and the statutory formula is applied.",
+      "nothingCountedYet": "No amount could be counted from the answers entered so far. The categories listed are still worth searching."
+    },
+    "confidence": {
+      "reported": "You entered this",
+      "statutory": "Set by law",
+      "estimated": "Estimated by this app",
+      "flag-only": "No amount counted"
+    }
+  },
+  "landRecords": {
+    "title": "Property and land",
+    "body": "No rupee value is estimated for property or land, because no honest figure can be produced without a valuation. What this app does instead is point you at the correct state land record portal, explain what to search by, and record whatever you find.",
+    "safety": "This app never asks for Aadhaar, PAN, a password, or a one-time code. Search on the official state site yourself, in your own browser, and enter what you find below. Any service that offers to search on your behalf in exchange for those details is a scam.",
+    "stateLabel": "Which state is the property or land in?",
+    "stateHelp": "Pick a state to see its official land record portal.",
+    "statePick": "Choose a state",
+    "guessedFromPlace": "Shown from the town entered earlier. Change the state above if the property is elsewhere.",
+    "openPortal": "Open the official land record portal",
+    "opensInNewTab": "Opens in a new tab: {url}",
+    "noPortalTitle": "No confirmed portal for {state} yet",
+    "noPortalBody": "The official address for this state has not been confirmed, and this app does not print an address it has not checked. A wrong land record address is how families end up on a convincing fake site. Start from the central land records programme below, which links to each state, or ask a lawyer.",
+    "openCentral": "Open the central land records programme",
+    "foundLabel": "Did you find any property or land? Enter it here.",
+    "foundHelp": "Whatever you can see is enough: a survey number, a village name, or an area.",
+    "foundPlaceholder": "For example: survey number 142/2 at Wagholi village, about 0.4 hectare",
+    "addToCase": "Add this to my case",
+    "adding": "Adding",
+    "addedSupabase": "Added to your case.",
+    "addedDevice": "Added, and saved on this device for now.",
+    "addedDemo": "Added. In demo mode nothing is saved.",
+    "allStatesTitle": "Every state portal this app has confirmed",
+    "notYetConfirmed": "States with no confirmed address yet. These are listed by name rather than linked, because an unverified land record link is not worth the risk.",
+    "portals": {
+      "maharashtra": "Search the 7/12 extract, the 8A extract, or a property card. Choose the district, taluka, and village, then enter the survey or gat number.",
+      "gujarat": "Choose rural land records for a village or urban land records for a city, then search the record of rights.",
+      "karnataka": "Search the RTC, also called the pahani, by survey number or by the name of the owner. Khata extracts and mutation status are on the same portal.",
+      "uttarPradesh": "Search the khatauni by district, tehsil, and village, then by khasra number or by the name of the owner.",
+      "rajasthan": "Search the jamabandi copy for agricultural land by district, tehsil, and village. The online copy is for reference, and a certified copy is applied for at a kiosk.",
+      "tamilNadu": "Choose the district, taluk, and village, then search the patta or chitta by patta number or by survey number. A subdivision goes in its own field.",
+      "telangana": "Search the details of land, the encumbrance certificate, and registered document details. Succession applications are made on the same portal."
     }
   }
 }

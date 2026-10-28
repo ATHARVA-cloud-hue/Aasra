@@ -61,6 +61,21 @@ function fromYesNo(value: unknown): string {
   return "";
 }
 
+/*
+  A number field holds text while it is being typed, because a
+  half-typed number is not a number. It becomes a real number on the
+  way to the database, and an empty box becomes null rather than 0:
+  "I do not know my relative's salary" and "my relative earned nothing"
+  are different answers, and the estimate treats them differently.
+*/
+function toNumberOrNull(value: string): number | null {
+  const cleaned = value.replace(/[,\s₹]/g, "");
+  if (!cleaned) return null;
+
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed) : null;
+}
+
 type SaveState = "idle" | "loading" | "saving" | "saved" | "device" | "demo";
 
 export function IntakeForm({ step }: { step: IntakeStep }) {
@@ -148,6 +163,8 @@ export function IntakeForm({ step }: { step: IntakeStep }) {
             not "Not sure".
           */
           existing[field.name] = remembered[field.name] ?? fromYesNo(value);
+        } else if (field.kind === "number") {
+          existing[field.name] = typeof value === "number" ? String(value) : "";
         } else {
           existing[field.name] = typeof value === "string" ? value : "";
         }
@@ -191,7 +208,7 @@ export function IntakeForm({ step }: { step: IntakeStep }) {
         Build what the database actually receives. Text goes across as
         typed; a pressed button becomes true, false or unknown.
       */
-      const patch: Record<string, string | boolean | null> = {};
+      const patch: Record<string, string | number | boolean | null> = {};
       const buttons: Record<string, string> = {};
 
       for (const [key, value] of Object.entries(changed)) {
@@ -199,6 +216,8 @@ export function IntakeForm({ step }: { step: IntakeStep }) {
         if (field?.savesAsYesNo) {
           patch[key] = toYesNo(value);
           buttons[key] = value;
+        } else if (field?.kind === "number") {
+          patch[key] = toNumberOrNull(value);
         } else {
           patch[key] = value;
         }
@@ -287,6 +306,7 @@ export function IntakeForm({ step }: { step: IntakeStep }) {
             key={field.name}
             field={field}
             label={tStep(`${field.name}.label`)}
+            optionalLabel={field.optional ? t("optional") : undefined}
             note={optionalText(field, "note")}
             optionLabel={(option) => tRoot(`${field.optionsNamespace}.${option}`)}
             value={values[field.name] ?? ""}
@@ -296,13 +316,52 @@ export function IntakeForm({ step }: { step: IntakeStep }) {
           <div key={field.name}>
             <label htmlFor={field.name} className="text-base font-medium text-ink">
               {tStep(`${field.name}.label`)}
+              {field.optional && (
+                <span className="ms-2 text-sm font-normal text-ink-muted">{t("optional")}</span>
+              )}
             </label>
 
             {optionalText(field, "note") && (
               <p className="mt-1 text-sm text-ink-muted">{optionalText(field, "note")}</p>
             )}
 
-            {field.kind === "long" ? (
+            {field.kind === "select" ? (
+              <select
+                id={field.name}
+                name={field.name}
+                value={values[field.name] ?? ""}
+                onChange={(event) => handleChange(field, event.target.value)}
+                onBlur={handleBlur}
+                className={box}
+              >
+                {/* An empty first option, so "not answered" is a real choice. */}
+                <option value="">{t("notAnswered")}</option>
+                {(field.options ?? []).map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : field.kind === "number" ? (
+              <input
+                id={field.name}
+                name={field.name}
+                type="text"
+                inputMode="numeric"
+                dir="ltr"
+                min={field.min}
+                max={field.max}
+                placeholder={optionalText(field, "placeholder")}
+                value={values[field.name] ?? ""}
+                onChange={(event) =>
+                  // Digits only while typing, so a stray letter cannot
+                  // make the box look broken.
+                  handleChange(field, event.target.value.replace(/[^\d]/g, ""))
+                }
+                onBlur={handleBlur}
+                className={box}
+              />
+            ) : field.kind === "long" ? (
               <textarea
                 id={field.name}
                 name={field.name}
@@ -349,6 +408,7 @@ export function IntakeForm({ step }: { step: IntakeStep }) {
 function ChoiceField({
   field,
   label,
+  optionalLabel,
   note,
   optionLabel,
   value,
@@ -356,6 +416,7 @@ function ChoiceField({
 }: {
   field: IntakeField;
   label: string;
+  optionalLabel?: string;
   note?: string;
   optionLabel: (option: string) => string;
   value: string;
@@ -363,7 +424,12 @@ function ChoiceField({
 }) {
   return (
     <fieldset className="border-0 p-0">
-      <legend className="text-base font-medium text-ink">{label}</legend>
+      <legend className="text-base font-medium text-ink">
+        {label}
+        {optionalLabel && (
+          <span className="ms-2 text-sm font-normal text-ink-muted">{optionalLabel}</span>
+        )}
+      </legend>
       {note && <p className="mt-1 text-sm text-ink-muted">{note}</p>}
 
       <div className="mt-3 flex flex-wrap gap-2">

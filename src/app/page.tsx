@@ -30,6 +30,8 @@ const PORTALS = REGISTRIES.map((registry) => registry.where);
 
 export default async function Home() {
   const t = await getTranslations("home");
+  // The recovery card belongs to its own namespace, not to "home".
+  const tRecovery = await getTranslations("recovery");
 
   return (
     <>
@@ -71,6 +73,22 @@ export default async function Home() {
               <h2 className="text-xl">{t("ask.title")}</h2>
               <p className="mt-2 text-ink-soft">{t("ask.body")}</p>
               <AskButton className="mt-6 w-full sm:w-auto">{t("ask.button")}</AskButton>
+            </Card>
+          </FadeIn>
+        </Container>
+      </section>
+
+      {/* ---------- The recovery estimate ---------- */}
+      <section className="py-10">
+        <Container width="narrow">
+          <FadeIn>
+            <Card>
+              <h2 className="text-xl">{tRecovery("title")}</h2>
+              <p className="mt-2 text-ink-soft">{tRecovery("homeBody")}</p>
+              <Button href="/recovery" className="mt-6 w-full sm:w-auto">
+                {tRecovery("homeButton")}
+              </Button>
+              <p className="mt-4 text-sm text-ink-muted">{tRecovery("homeHonesty")}</p>
             </Card>
           </FadeIn>
         </Container>

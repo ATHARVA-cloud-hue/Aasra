@@ -59,6 +59,30 @@ create table if not exists public.cases (
 
 
 -- ----------------------------------------------------------------------------
+--  1b. The optional answers behind the recovery estimate.
+--
+--      Added after the cases table shipped, so they go on as separate
+--      "add column if not exists" statements rather than being edited
+--      into the create above. That keeps this whole file safe to run
+--      again on a database that already has data in it.
+--
+--      Every one is nullable. The estimate works without them and
+--      simply shows wider ranges, so nothing here is required.
+-- ----------------------------------------------------------------------------
+alter table public.cases
+  add column if not exists employed_at_death boolean;      -- in a job at death?
+
+alter table public.cases
+  add column if not exists years_of_service integer;       -- whole years worked
+
+alter table public.cases
+  add column if not exists last_monthly_salary integer;    -- rupees per month
+
+alter table public.cases
+  add column if not exists property_state text;            -- which state's land portal
+
+
+-- ----------------------------------------------------------------------------
 --  2. ASSETS — a bank account, a policy, a plot of land. Many per case.
 -- ----------------------------------------------------------------------------
 create table if not exists public.assets (

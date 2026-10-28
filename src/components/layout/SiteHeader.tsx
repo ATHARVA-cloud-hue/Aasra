@@ -28,6 +28,9 @@ export async function SiteHeader() {
         </Link>
 
         <nav aria-label={t("nav.getHelp")} className="flex flex-wrap items-center gap-x-1 gap-y-1">
+          <HeaderLink href="/recovery" label={t("nav.recoveryFull")}>
+            {t("nav.recovery")}
+          </HeaderLink>
           <HeaderLink href="/hidden-assets" label={t("nav.findLostMoneyFull")}>
             {t("nav.findLostMoney")}
           </HeaderLink>

@@ -1,3 +1,5 @@
+import { ALL_STATES } from "@/lib/landRecords";
+
 /*
   THE FLOW — one source of truth for the order of the steps.
 
@@ -89,11 +91,17 @@ export type IntakeFieldName =
   | "known_assets_note"
   | "mother_name"
   | "religion"
+  // The optional questions that sharpen the recovery estimate. Every
+  // one is skippable, and the estimate degrades gracefully without it.
+  | "years_of_service"
+  | "last_monthly_salary"
+  | "property_state"
   // Chosen from buttons, stored as true / false / unknown
   | "has_will"
   | "assets_abroad"
   | "owned_business"
-  | "mother_living";
+  | "mother_living"
+  | "employed_at_death";
 
 /*
   Where a choice question finds the labels for its buttons. The values
@@ -108,12 +116,24 @@ export type IntakeField = {
     intake.steps.<slug>.fields.<name>.{label,placeholder,note}
   */
   name: IntakeFieldName;
-  /** "long" draws a bigger box for lists. "choice" draws buttons. */
-  kind?: "text" | "date" | "long" | "choice";
-  /** The values to pick between. Needed when kind is "choice". */
+  /*
+    "long" draws a bigger box for lists. "choice" draws buttons.
+    "number" draws a numeric box. "select" draws a dropdown, which is
+    right where there are thirty options rather than three.
+  */
+  kind?: "text" | "date" | "long" | "choice" | "number" | "select";
+  /** The values to pick between. Needed for "choice" and "select". */
   options?: string[];
   /** Which namespace holds the labels for those values. */
   optionsNamespace?: OptionsNamespace;
+  /*
+    True for a question nobody has to answer. Drawn with an
+    "optional" marker, and the step says so at the top.
+  */
+  optional?: boolean;
+  /** Smallest and largest sensible value, for a "number" field. */
+  min?: number;
+  max?: number;
   /*
     For a "choice" question saved into a true/false column:
     "yes" becomes true, "no" becomes false, and anything else
@@ -226,6 +246,39 @@ export const INTAKE_STEPS: IntakeStep[] = [
         options: YES_NO_UNSURE,
         optionsNamespace: "intake.options",
         savesAsYesNo: true,
+      },
+    ],
+  },
+  /*
+    THE OPTIONAL QUESTIONS.
+
+    Every field here is optional, and the step says so plainly. They
+    exist only to sharpen the recovery estimate: a salary and a length
+    of service turn a wide placeholder range into a real calculation
+    from the statutory formulas, and a state name picks the right land
+    record portal.
+
+    Left blank, the estimate still works. It simply shows the wider
+    ranges and asks the family to come back if they find a payslip.
+  */
+  {
+    slug: "9",
+    fields: [
+      {
+        name: "employed_at_death",
+        kind: "choice",
+        options: YES_NO_UNSURE,
+        optionsNamespace: "intake.options",
+        savesAsYesNo: true,
+        optional: true,
+      },
+      { name: "years_of_service", kind: "number", optional: true, min: 0, max: 60 },
+      { name: "last_monthly_salary", kind: "number", optional: true, min: 0, max: 10000000 },
+      {
+        name: "property_state",
+        kind: "select",
+        options: ALL_STATES,
+        optional: true,
       },
     ],
   },

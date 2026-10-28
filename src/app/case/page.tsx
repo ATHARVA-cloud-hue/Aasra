@@ -35,6 +35,19 @@ export default async function CasePage() {
     >
       <CaseSummary />
 
+      {/*
+        The recovery estimate, offered prominently here because this is
+        the page a family returns to. The number itself lives on
+        /recovery with its full workings; this is the way in.
+      */}
+      <Card className="mt-5">
+        <h2 className="text-xl">{t("case.recoveryTitle")}</h2>
+        <p className="mt-2 text-ink-soft">{t("case.recoveryBody")}</p>
+        <Button href="/recovery" className="mt-6 w-full sm:w-auto">
+          {t("case.recoveryButton")}
+        </Button>
+      </Card>
+
       <Card className="mt-5">
         <h2 className="text-xl">{t("case.helpTitle")}</h2>
         <p className="mt-2 text-ink-soft">{t("case.helpBody")}</p>

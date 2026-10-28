@@ -40,6 +40,19 @@ export type CaseRecord = {
   mother_name?: string | null;
   known_assets_note?: string | null;
   last_step?: string | null;
+
+  /*
+    The optional answers behind the recovery estimate. All nullable,
+    all skippable: the estimate falls back to wider ranges without
+    them rather than refusing to work.
+  */
+  employed_at_death?: boolean | null;
+  /** Whole years. Used with the salary for EPF and gratuity. */
+  years_of_service?: number | null;
+  /** Rupees per month, as last drawn. */
+  last_monthly_salary?: number | null;
+  /** The state whose land record portal to show first. */
+  property_state?: string | null;
 };
 
 export type AssetInput = {
