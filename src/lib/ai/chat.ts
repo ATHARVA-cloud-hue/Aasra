@@ -77,11 +77,15 @@ const HISTORY_LIMIT = 8;
 /** A single question is capped at this, which is far more than enough. */
 export const MESSAGE_LIMIT = 2000;
 
-export type ChatAnswer = {
-  reply: string;
-  /** "gemini" = really answered. "demo" = a pre-written sample answer. */
-  source: "gemini" | "demo";
-};
+/*
+  What came back.
+
+  "text" is a real answer from the model, already in the language the
+  question was asked in. "canned" is a KEY under chat.canned, which the
+  route looks up in the reader's own language, because a pre-written
+  answer has to exist in five languages and cannot be assembled here.
+*/
+export type ChatAnswer = { kind: "text"; text: string } | { kind: "canned"; key: string };
 
 export async function answerQuestion(message: string, history: ChatTurn[]): Promise<ChatAnswer> {
   const result = await askGemini({
@@ -95,11 +99,9 @@ export async function answerQuestion(message: string, history: ChatTurn[]): Prom
     maxOutputTokens: 400,
   });
 
-  if (!result.ok) {
-    return { reply: cannedAnswer(message), source: "demo" };
-  }
+  if (!result.ok) return { kind: "canned", key: cannedAnswerKey(message) };
 
-  return { reply: result.text, source: "gemini" };
+  return { kind: "text", text: result.text };
 }
 
 /* ------------------------------------------------------------------ */
@@ -107,100 +109,45 @@ export async function answerQuestion(message: string, history: ChatTurn[]): Prom
 /* ------------------------------------------------------------------ */
 
 /*
-  Written by hand, and held to exactly the same limits as the real
+  The pre-written answers, held to exactly the same limits as the real
   assistant: none of them decides who inherits, and each points at a
-  lawyer for anything legal. They are chosen by looking for a few
-  obvious words, so a demo asking the likely questions still gets a
-  sensible reply rather than a shrug.
+  lawyer for anything legal. The words are in messages/*.json under
+  chat.canned; what is here is only which one to use.
+
+  They are chosen by looking for a few obvious words. The keywords are
+  English, which is a real limit: a question typed entirely in Hindi
+  script will usually fall through to "fallback". In practice many
+  people type the institution names and terms in English even in a
+  Hindi sentence ("LIC", "bank", "EPF"), so the common cases are still
+  caught. With an AI key set, none of this is reached.
 */
-const CANNED: { keywords: string[]; reply: string }[] = [
+const CANNED: { key: string; keywords: string[] }[] = [
+  { key: "succession", keywords: ["succession certificate", "succession"] },
+  { key: "probate", keywords: ["probate"] },
+  { key: "legalHeir", keywords: ["legal heir", "heir certificate", "heirship"] },
+  { key: "bank", keywords: ["bank", "account", "passbook", "withdraw"] },
+  { key: "insurance", keywords: ["insurance", "policy", "lic", "claim amount"] },
+  { key: "providentFund", keywords: ["provident", "epf", "epfo", "pf", "pension"] },
   {
-    keywords: ["succession certificate", "succession"],
-    reply:
-      "A succession certificate is a paper from a civil court saying who may collect a person's money and " +
-      "investments. Banks often ask for one when there was no will and no nominee. It usually takes a few months, " +
-      "and a lawyer prepares the application — we can arrange that for you.",
-  },
-  {
-    keywords: ["probate"],
-    reply:
-      "Probate is a court confirming that a will is genuine, so banks and offices will act on it. It is only needed " +
-      "where there is a will. A lawyer handles the filing, and we can take you through what it involves.",
-  },
-  {
-    keywords: ["legal heir", "heir certificate", "heirship"],
-    reply:
-      "A legal heir certificate is a local government document naming the close family of someone who has died. It " +
-      "is quicker and cheaper than a succession certificate, though some banks will not accept it on its own. The " +
-      "tehsil or municipal office issues it.",
-  },
-  {
-    keywords: ["bank", "account", "passbook", "withdraw"],
-    reply:
-      "For a bank claim you will usually need the death certificate, your own ID, the bank's claim form, and the " +
-      "passbook or account number. If you were named as nominee it is fairly quick; if not, the bank may ask for a " +
-      "succession certificate. We can tell you which applies once we know the account.",
-  },
-  {
-    keywords: ["insurance", "policy", "lic", "claim amount"],
-    reply:
-      "For a life insurance claim the insurer normally wants the original policy, the death certificate, their claim " +
-      "form, and proof of the bank account the money should go to. If the policy document is lost, do not worry — the " +
-      "insurer can trace it from the policy number or the person's details.",
-  },
-  {
-    keywords: ["provident", "epf", "epfo", "pf", "pension"],
-    reply:
-      "Provident fund money is claimed from EPFO using forms 20, 5-IF and 10-D, along with the death certificate and " +
-      "Aadhaar. There is often a pension and an insurance amount owed too, which families are rarely told about.",
-  },
-  {
+    key: "start",
     keywords: ["start", "what do i do", "where do i begin", "first step", "next step", "what now"],
-    reply:
-      "Start with the death certificate — almost every office will ask for it, and nothing else moves without it. " +
-      "After that, answer whatever questions you can in this app, and we will work out who needs to be told and in " +
-      "what order. There is no hurry today.",
   },
+  { key: "howLong", keywords: ["how long", "how many days", "time", "delay"] },
   {
-    keywords: ["how long", "how many days", "time", "delay"],
-    reply:
-      "It varies. A bank claim with a nominee can be a few weeks; one needing a court certificate is usually three to " +
-      "six months. Insurance is often six to eight weeks. We will tell you what is waiting on whom, so the silence " +
-      "never feels like nothing is happening.",
-  },
-  {
+    key: "shares",
     keywords: ["who inherits", "share", "divide", "entitled", "how much do i get"],
-    reply:
-      "I am not able to work out shares — that depends on which law applies to your family and whether there was a " +
-      "will, and getting it wrong would be serious. Answer the questions in this app and we will set it out for you, " +
-      "with a lawyer confirming it before anything is filed.",
   },
-  {
-    keywords: ["will", "vasiyat"],
-    reply:
-      "If there is a will, it decides who inherits rather than the general law — but it has to be shown to be genuine " +
-      "first, which is what probate does. Bring it to us and a lawyer will read it with you and explain it plainly.",
-  },
-  {
-    keywords: ["documents", "papers", "need", "certificate"],
-    reply:
-      "The death certificate is the one everything depends on. Beyond that it is usually their ID, your ID, and " +
-      "whatever paperwork relates to the account or policy — a passbook, a statement, a policy number. Even a photo " +
-      "of an old document helps.",
-  },
+  { key: "will", keywords: ["will", "vasiyat"] },
+  { key: "documents", keywords: ["documents", "papers", "need", "certificate"] },
 ];
 
-const FALLBACK =
-  "I am not able to answer that just now. You can ask me what a document means, what a bank or insurer will want " +
-  "from you, or what the next step is — and if it would help to talk to a lawyer instead, there is a link for that " +
-  "at the bottom of this panel.";
-
-export function cannedAnswer(message: string): string {
+/** Which pre-written answer fits best. Always returns a usable key. */
+export function cannedAnswerKey(message: string): string {
   const text = message.toLowerCase();
 
   // Pick whichever pre-written answer shares the most words with the
   // question, preferring longer (so more specific) phrases.
-  let best: { score: number; reply: string } | null = null;
+  let best: { score: number; key: string } | null = null;
 
   for (const entry of CANNED) {
     let score = 0;
@@ -208,9 +155,9 @@ export function cannedAnswer(message: string): string {
       if (text.includes(keyword)) score = Math.max(score, keyword.length);
     }
     if (score > 0 && (!best || score > best.score)) {
-      best = { score, reply: entry.reply };
+      best = { score, key: entry.key };
     }
   }
 
-  return best ? best.reply : FALLBACK;
+  return best ? best.key : "fallback";
 }

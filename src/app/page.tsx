@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
@@ -7,89 +8,69 @@ import { ReligionChoice } from "@/components/religion/ReligionChoice";
 import { REGISTRIES } from "@/lib/registries";
 
 /*
-  LANDING PAGE
-  One clear choice at the top: "You've lost someone — start here".
-  Everything below is quiet reassurance, not a sales pitch.
+  THE HOME PAGE.
+
+  One clear action at the top: start a claim. Below it, the three things
+  somebody might want before committing to anything: ask a question,
+  find out which law applies, or search the government portals.
 */
 
-const steps = [
-  {
-    title: "Tell us a little",
-    body: "One gentle question at a time. Stop whenever you need to — we save as you go.",
-  },
-  {
-    title: "We find and organise",
-    body: "Photograph a document and we read it for you. We also help you look for money you may not know about.",
-  },
-  {
-    title: "We walk with you to the end",
-    body: "A clear list of what each bank or insurer needs, with a lawyer checking anything legal.",
-  },
-];
+/** Keys under home.steps, in order. */
+const STEPS = ["one", "two", "three"];
+
+/** Keys under home.situations. */
+const SITUATIONS = ["noWill", "unknownAssets", "abroad", "firstTime", "business"];
 
 /*
-  Read off the registry list rather than typed out again, so the pills
-  on this page can never promise a portal the finder does not have.
+  The portal names are read off the registry list rather than typed out
+  again, so this page can never promise a portal the finder does not
+  have. They are institution names, so they are not translated.
 */
-const portals = REGISTRIES.map((registry) => registry.where);
+const PORTALS = REGISTRIES.map((registry) => registry.where);
 
-const whoWeHelp = [
-  { title: "There was no will", body: "Most families don't have one. That's okay — we start from wherever you are." },
-  { title: "You're not sure what exists", body: "Old bank accounts, insurance or EPF can be forgotten. We help you search." },
-  { title: "You live abroad", body: "Handle things from another country, with help on the ground in India." },
-  { title: "This is your first time", body: "Never dealt with banks or paperwork? Plain words, and a person to talk to." },
-  { title: "They ran a business", body: "GST, licences, staff and business accounts — we'll help with those too." },
-];
+export default async function Home() {
+  const t = await getTranslations("home");
 
-export default function Home() {
   return (
     <>
       {/* ---------- Hero ---------- */}
       <section className="pb-20 pt-10 sm:pt-20">
         <Container width="narrow" className="text-center">
           <FadeIn>
-            <p className="text-base text-ink-muted">We&apos;re so sorry for your loss.</p>
+            <p className="text-base text-ink-muted">{t("condolence")}</p>
           </FadeIn>
 
           <FadeIn delay={150}>
-            <h1 className="mt-5 text-4xl sm:text-5xl">
-              We&apos;ll help you with what comes next, one step at a time.
-            </h1>
+            <h1 className="mt-5 text-4xl sm:text-5xl">{t("title")}</h1>
           </FadeIn>
 
           <FadeIn delay={300}>
-            <p className="mt-6 text-lg text-ink-soft">
-              We guide your family through claiming what your loved one left behind — bank accounts, insurance, EPF,
-              shares and property. From &ldquo;what do we do now?&rdquo; to the money reaching you.
-            </p>
+            <p className="mt-6 text-lg text-ink-soft">{t("lead")}</p>
           </FadeIn>
 
           <FadeIn delay={450} className="mt-10 flex flex-col items-center gap-4">
             <Button href="/login" size="lg" className="w-full sm:w-auto">
-              You&apos;ve lost someone — start here
+              {t("startClaim")}
             </Button>
             <Button href="/plan-ahead" variant="secondary" className="w-full sm:w-auto">
-              Plan ahead for my family
+              {t("planAhead")}
             </Button>
           </FadeIn>
 
           <FadeIn delay={600}>
-            <p className="mt-6 text-sm text-ink-muted">Free to begin · No will needed · You can stop and come back anytime</p>
+            <p className="mt-6 text-sm text-ink-muted">{t("reassurance")}</p>
           </FadeIn>
         </Container>
       </section>
 
-      {/* ---------- A doubt, right now ---------- */}
+      {/* ---------- A question, right now ---------- */}
       <section className="pb-8">
         <Container width="narrow">
           <FadeIn>
             <Card className="text-center">
-              <h2 className="text-xl">Have an immediate doubt?</h2>
-              <p className="mt-2 text-ink-soft">
-                You do not have to start anything to ask. Say what is worrying you, in your own words, and our
-                assistant will answer in plain language — at three in the morning if that is when it comes.
-              </p>
-              <AskButton className="mt-6 w-full sm:w-auto">Ask our assistant</AskButton>
+              <h2 className="text-xl">{t("ask.title")}</h2>
+              <p className="mt-2 text-ink-soft">{t("ask.body")}</p>
+              <AskButton className="mt-6 w-full sm:w-auto">{t("ask.button")}</AskButton>
             </Card>
           </FadeIn>
         </Container>
@@ -109,16 +90,14 @@ export default function Home() {
         <Container width="narrow">
           <FadeIn>
             <Card>
-              <h2 className="text-xl">Find money your family may not know about</h2>
-              <p className="mt-2 text-ink-soft">
-                Forgotten bank accounts, unclaimed shares, provident fund, old insurance policies, a business in
-                their name. We open the right official page for each one and tell you what to look for.
-              </p>
+              <h2 className="text-xl">{t("portals.title")}</h2>
+              <p className="mt-2 text-ink-soft">{t("portals.body")}</p>
 
-              <ul className="mt-5 flex flex-wrap gap-2" aria-label="The portals we take you to">
-                {portals.map((portal) => (
+              <ul className="mt-5 flex flex-wrap gap-2" aria-label={t("portals.listLabel")}>
+                {PORTALS.map((portal) => (
                   <li
                     key={portal}
+                    lang="en"
                     className="rounded-full bg-sage-50 px-3 py-1 text-sm text-sage-800"
                   >
                     {portal}
@@ -127,13 +106,10 @@ export default function Home() {
               </ul>
 
               <Button href="/hidden-assets" className="mt-6 w-full sm:w-auto">
-                Find lost money · Government portals
+                {t("portals.button")}
               </Button>
 
-              <p className="mt-4 text-sm text-ink-muted">
-                You do the searching, on the official site, in your own browser. We will never ask you for a
-                password, a PIN or a one-time code.
-              </p>
+              <p className="mt-4 text-sm text-ink-muted">{t("portals.safety")}</p>
             </Card>
           </FadeIn>
         </Container>
@@ -142,16 +118,16 @@ export default function Home() {
       {/* ---------- How it works ---------- */}
       <section className="py-16">
         <Container>
-          <h2 className="text-center text-3xl">How we help</h2>
+          <h2 className="text-center text-3xl">{t("howTitle")}</h2>
           <ol className="mt-10 grid gap-5 sm:grid-cols-3">
-            {steps.map((step, i) => (
-              <li key={step.title}>
+            {STEPS.map((step, i) => (
+              <li key={step}>
                 <Card className="h-full">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-100 font-serif text-lg text-sage-800">
                     {i + 1}
                   </span>
-                  <h3 className="mt-4 text-xl">{step.title}</h3>
-                  <p className="mt-2 text-ink-soft">{step.body}</p>
+                  <h3 className="mt-4 text-xl">{t(`steps.${step}.title`)}</h3>
+                  <p className="mt-2 text-ink-soft">{t(`steps.${step}.body`)}</p>
                 </Card>
               </li>
             ))}
@@ -159,29 +135,26 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ---------- Our principle ---------- */}
+      {/* ---------- What the app does, and what lawyers do ---------- */}
       <section className="py-16">
         <Container width="narrow" className="text-center">
           <blockquote className="font-serif text-2xl leading-snug text-ink sm:text-3xl">
-            &ldquo;Technology does the reading, writing, translating and reminding. Lawyers do the deciding.&rdquo;
+            {t("principle.quote")}
           </blockquote>
-          <p className="mt-5 text-ink-soft">
-            Our assistant helps organise and explain. A qualified lawyer approves anything legal before your family sees
-            it.
-          </p>
+          <p className="mt-5 text-ink-soft">{t("principle.note")}</p>
         </Container>
       </section>
 
-      {/* ---------- Who we're here for ---------- */}
+      {/* ---------- Common situations ---------- */}
       <section className="py-16">
         <Container>
-          <h2 className="text-center text-3xl">Wherever you&apos;re starting from</h2>
+          <h2 className="text-center text-3xl">{t("situationsTitle")}</h2>
           <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {whoWeHelp.map((item) => (
-              <li key={item.title}>
+            {SITUATIONS.map((item) => (
+              <li key={item}>
                 <Card className="h-full">
-                  <h3 className="text-xl">{item.title}</h3>
-                  <p className="mt-2 text-ink-soft">{item.body}</p>
+                  <h3 className="text-xl">{t(`situations.${item}.title`)}</h3>
+                  <p className="mt-2 text-ink-soft">{t(`situations.${item}.body`)}</p>
                 </Card>
               </li>
             ))}
@@ -189,13 +162,13 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ---------- Closing invitation ---------- */}
+      {/* ---------- Closing ---------- */}
       <section className="py-16">
         <Container width="narrow" className="text-center">
-          <h2 className="text-3xl">Whenever you&apos;re ready</h2>
-          <p className="mt-4 text-ink-soft">There&apos;s no rush. It takes a few minutes to begin, and we save as you go.</p>
+          <h2 className="text-3xl">{t("closing.title")}</h2>
+          <p className="mt-4 text-ink-soft">{t("closing.body")}</p>
           <Button href="/login" size="lg" className="mt-8 w-full sm:w-auto">
-            Start here
+            {t("startClaim")}
           </Button>
         </Container>
       </section>

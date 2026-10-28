@@ -15,7 +15,7 @@ import { JourneyProgress } from "@/components/layout/JourneyProgress";
 
 export type StepLink = { href: string; label: string };
 
-export function StepPage({
+export async function StepPage({
   stage,
   eyebrow,
   title,
@@ -41,6 +41,7 @@ export function StepPage({
     <section className="py-12 sm:py-16">
       <Container width="narrow">
         <JourneyProgress current={stage} />
+
 
         <FadeIn className="mt-12">
           {eyebrow && <p className="text-sm text-ink-muted">{eyebrow}</p>}

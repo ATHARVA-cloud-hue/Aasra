@@ -1,16 +1,17 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { STAGES, stageIndex } from "@/lib/journey";
 
 /*
-  A quiet strip showing the five stages of the journey, with the
-  current one marked. Every stage stays clickable so nobody ever
-  feels trapped on a page.
+  A strip showing the five steps, with the current one marked. Every
+  step stays clickable so nobody is ever stuck on a page.
 */
-export function JourneyProgress({ current }: { current: string }) {
+export async function JourneyProgress({ current }: { current: string }) {
+  const t = await getTranslations();
   const currentIndex = stageIndex(current);
 
   return (
-    <nav aria-label="Your progress">
+    <nav aria-label={t("common.progress")}>
       <ol className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-sm">
         {STAGES.map((stage, i) => {
           const isCurrent = i === currentIndex;
@@ -34,7 +35,7 @@ export function JourneyProgress({ current }: { current: string }) {
                       : "text-ink-muted"
                 }`}
               >
-                {stage.label}
+                {t(`stages.${stage.key}.label`)}
               </Link>
             </li>
           );

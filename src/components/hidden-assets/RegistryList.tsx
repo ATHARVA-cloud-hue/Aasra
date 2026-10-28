@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -9,20 +10,22 @@ import { ALSO_WORTH_CHECKING, REGISTRIES, type Registry } from "@/lib/registries
   THE OFFICIAL SEARCHES, ONE AT A TIME.
 
   Each registry gets its own card: what it is, why it is worth looking,
-  a button to the real site, and a box to tell us what was found.
+  a button to the real site, and a box to report what was found.
 
   Why a family has to search themselves: these portals need the
   person's own identity details, and no honest service asks you to hand
-  those over so it can "look for you". So we explain where to look, and
-  take whatever they come back with.
+  those over so it can "look for you". So the app explains where to
+  look, and takes whatever comes back.
 
   A find is saved as an asset with source "discovered", which is what
-  lets the case page say "we found this" rather than "you told us".
+  lets the case page say "found by the app" rather than "entered by you".
 */
 
 type Status = "idle" | "saving" | "supabase" | "device" | "demo";
 
 export function RegistryList() {
+  const t = useTranslations("hiddenAssets");
+
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Record<string, Status>>({});
 
@@ -35,13 +38,13 @@ export function RegistryList() {
     const { addAssets, getMode } = await import("@/lib/caseStore");
 
     /*
-      In demo mode we deliberately do not write anything.
+      In demo mode nothing is written, deliberately.
 
-      Someone may well walk the real journey, then come back and click
+      Someone may well walk the real steps, then return and click
       through as a demo family to show a colleague. If demo clicks wrote
-      to the database, they would land in that person's real case — and
+      to the database, they would land in that person's real case, and
       a made-up bank account appearing in a genuine inheritance claim is
-      not a mess we are willing to risk.
+      not a mess worth risking.
     */
     if (getMode() === "demo") {
       setStatus((current) => ({ ...current, [registry.id]: "demo" }));
@@ -69,32 +72,26 @@ export function RegistryList() {
     <>
       {/* Said once, at the top, before anyone clicks anything. */}
       <Card>
-        <h2 className="text-xl">How this part works</h2>
-        <p className="mt-3 text-ink-soft">
-          Each search below is on a government or regulator site. You run them yourself, in your own browser — we
-          open the right page and tell you what to look for.
-        </p>
-        <p className="mt-4 rounded-2xl bg-sage-50 px-4 py-3 text-sage-800">
-          We will never ask you for a password, a PIN, or a one-time code. Nobody honest needs those to look for money
-          that belongs to your family. If any service asks you for them, walk away.
-        </p>
-        <p className="mt-4 text-ink-soft">
-          Found something? Type it into the box underneath that search and it joins your case, so you never have to
-          remember it again.
-        </p>
+        <h2 className="text-xl">{t("howTitle")}</h2>
+        <p className="mt-3 text-ink-soft">{t("howBody")}</p>
+        <p className="mt-4 rounded-2xl bg-sage-50 px-4 py-3 text-sage-800">{t("safety")}</p>
+        <p className="mt-4 text-ink-soft">{t("howFound")}</p>
       </Card>
 
       {REGISTRIES.map((registry, index) => (
         <Card key={registry.id} className="mt-5">
           <p className="text-sm text-ink-muted">
-            Search {index + 1} of {REGISTRIES.length}
+            {t("searchCounter", { current: index + 1, total: REGISTRIES.length })}
           </p>
 
-          <h2 className="mt-2 text-xl">{registry.name}</h2>
-          <p className="mt-1 text-sm text-ink-muted">{registry.where}</p>
+          <h2 className="mt-2 text-xl">{t(`registries.${registry.id}.name`)}</h2>
+          {/* The institution's own name, so lang="en" keeps it in the Latin face. */}
+          <p className="mt-1 text-sm text-ink-muted" lang="en">
+            {registry.where}
+          </p>
 
-          <p className="mt-4 text-ink-soft">{registry.what}</p>
-          <p className="mt-3 text-ink-soft">{registry.why}</p>
+          <p className="mt-4 text-ink-soft">{t(`registries.${registry.id}.what`)}</p>
+          <p className="mt-3 text-ink-soft">{t(`registries.${registry.id}.why`)}</p>
 
           <Button
             href={registry.url}
@@ -102,27 +99,25 @@ export function RegistryList() {
             rel="noopener noreferrer"
             className="mt-6 w-full sm:w-auto"
           >
-            Open the official site
+            {t("openSite")}
           </Button>
 
           {/* Shown in full so it can be checked before clicking. */}
           <p className="mt-3 break-all text-sm text-ink-muted">
-            Opens in a new tab: {registry.url}
+            {t("opensInNewTab", { url: registry.url })}
           </p>
 
           <div className="mt-7 border-t border-line pt-6">
             <label htmlFor={`found-${registry.id}`} className="text-base font-medium text-ink">
-              Did you find anything? Tell us here.
+              {t("foundLabel")}
             </label>
-            <p className="mt-1 text-sm text-ink-muted">
-              Whatever you can see is enough — a bank name, an amount, a reference number.
-            </p>
+            <p className="mt-1 text-sm text-ink-muted">{t("foundHelp")}</p>
 
             <textarea
               id={`found-${registry.id}`}
               rows={3}
               value={notes[registry.id] ?? ""}
-              placeholder={registry.placeholder}
+              placeholder={t(`registries.${registry.id}.placeholder`)}
               disabled={status[registry.id] === "saving"}
               onChange={(event) =>
                 setNotes((current) => ({ ...current, [registry.id]: event.target.value }))
@@ -137,7 +132,7 @@ export function RegistryList() {
                 onClick={() => void report(registry)}
                 className="w-full sm:w-auto"
               >
-                {status[registry.id] === "saving" ? "Adding…" : "Add this to my case"}
+                {status[registry.id] === "saving" ? t("adding") : t("addToCase")}
               </Button>
 
               <ReportNote status={status[registry.id] ?? "idle"} />
@@ -147,40 +142,40 @@ export function RegistryList() {
       ))}
 
       <Card className="mt-5">
-        <h2 className="text-xl">Also worth a look</h2>
-        <p className="mt-2 text-ink-soft">
-          Two more places families often find something. We have not put buttons here yet, because we would rather
-          send you nowhere than send you to the wrong address.
-        </p>
+        <h2 className="text-xl">{t("alsoTitle")}</h2>
+        <p className="mt-2 text-ink-soft">{t("alsoBody")}</p>
         <ul className="mt-5 space-y-4">
           {ALSO_WORTH_CHECKING.map((item) => (
-            <li key={item.name} className="border-l-2 border-sage-200 pl-4">
+            <li key={item.id} className="border-s-2 border-sage-200 ps-4">
               <p className="text-ink">
-                {item.name} <span className="text-ink-muted">· {item.where}</span>
+                {t(`alsoWorthChecking.${item.id}.name`)}{" "}
+                <span className="text-ink-muted" lang="en">
+                  · {item.where}
+                </span>
               </p>
-              <p className="mt-1 text-ink-soft">{item.why}</p>
+              <p className="mt-1 text-ink-soft">{t(`alsoWorthChecking.${item.id}.why`)}</p>
             </li>
           ))}
         </ul>
       </Card>
     </>
   );
-}
 
-function ReportNote({ status }: { status: Status }) {
-  if (status === "idle" || status === "saving") return null;
+  function ReportNote({ status }: { status: Status }) {
+    if (status === "idle" || status === "saving") return null;
 
-  const message =
-    status === "supabase"
-      ? "Added to your case."
-      : status === "device"
-        ? "Added, and kept on this device for now."
-        : "Added — though in demo mode nothing is really saved.";
+    const message =
+      status === "supabase"
+        ? t("addedSupabase")
+        : status === "device"
+          ? t("addedDevice")
+          : t("addedDemo");
 
-  return (
-    <p className="text-sm text-sage-800" role="status">
-      <span aria-hidden="true">✓ </span>
-      {message}
-    </p>
-  );
+    return (
+      <p className="text-sm text-sage-800" role="status">
+        <span aria-hidden="true">✓ </span>
+        {message}
+      </p>
+    );
+  }
 }

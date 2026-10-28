@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { whatsappLink } from "@/lib/config";
 import {
+  isDemoLawyer,
   loadLawyers,
   requestConsultation,
   rupees,
@@ -22,12 +24,12 @@ import {
 
   Two deliberate choices on this page:
 
-  - Prices are shown up front, both of them. A family that has just
-    been handed a stack of forms should not have to ask what this will
-    cost, and "₹1,500 to talk" is a kinder answer than silence.
+  - Prices are shown up front, both of them. A family handed a stack of
+    forms should not have to ask what this will cost, and "₹1,500 to
+    talk" is a kinder answer than silence.
 
-  - "Request a consultation" never fails. If we cannot record the
-    request, the button quietly becomes a WhatsApp message with the
+  - "Request a consultation" never fails. If the request cannot be
+    recorded, the button quietly becomes a WhatsApp message with the
     lawyer's name already written in. The family gets through either
     way and never sees why.
 */
@@ -38,16 +40,16 @@ type Status =
   | { kind: "saved" }
   | { kind: "whatsapp"; href: string };
 
-type View =
-  | { kind: "loading" }
-  | { kind: "ready"; lawyers: Lawyer[]; from: LawyerSource };
+type View = { kind: "loading" } | { kind: "ready"; lawyers: Lawyer[]; from: LawyerSource };
 
 /** "All" plus the fixed specialty list, as filter buttons. */
-const FILTERS = ["All", ...SPECIALTIES] as const;
+const FILTERS = ["all", ...SPECIALTIES];
 
 export function LawyerList() {
+  const t = useTranslations("lawyers");
+
   const [view, setView] = useState<View>({ kind: "loading" });
-  const [filter, setFilter] = useState<string>("All");
+  const [filter, setFilter] = useState<string>("all");
   const [status, setStatus] = useState<Record<string, Status>>({});
 
   useEffect(() => {
@@ -63,6 +65,11 @@ export function LawyerList() {
     };
   }, []);
 
+  /** The specialty's own label, or the stored value if it is not one of ours. */
+  function specialtyLabel(value: string): string {
+    return t.has(`specialties.${value}`) ? t(`specialties.${value}`) : value;
+  }
+
   async function ask(lawyer: Lawyer) {
     setStatus((current) => ({ ...current, [lawyer.id]: { kind: "sending" } }));
 
@@ -74,13 +81,15 @@ export function LawyerList() {
     }
 
     /*
-      Falling back to WhatsApp. We hand back a link rather than calling
-      window.open, because a popup that the browser blocks would look
-      to the family like the button simply did nothing.
+      Falling back to WhatsApp. The link is handed back rather than
+      calling window.open, because a popup the browser blocks would
+      look to the family like the button simply did nothing.
     */
     const href = whatsappLink(
-      `Hello, I would like a consultation with ${lawyer.name}` +
-        `${lawyer.city ? ` in ${lawyer.city}` : ""}. Please tell me what to do next.`,
+      t("whatsapp.consultation", {
+        name: lawyer.name,
+        city: lawyer.city ? t("whatsapp.inCity", { city: lawyer.city }) : "",
+      }),
     );
     setStatus((current) => ({ ...current, [lawyer.id]: { kind: "whatsapp", href } }));
   }
@@ -89,32 +98,29 @@ export function LawyerList() {
     return (
       <Card>
         <p className="text-ink-soft" role="status">
-          Finding lawyers who work with families like yours…
+          {t("loading")}
         </p>
       </Card>
     );
   }
 
   const shown =
-    filter === "All" ? view.lawyers : view.lawyers.filter((lawyer) => lawyer.specialty === filter);
+    filter === "all" ? view.lawyers : view.lawyers.filter((lawyer) => lawyer.specialty === filter);
 
   return (
     <>
       {view.from === "demo" && (
         <div className="rounded-2xl bg-clay-50 px-4 py-3 text-sm text-clay-700" role="status">
-          A sample panel. These are not real practitioners — tap the button and one of us will answer instead.
+          {t("demoNotice")}
         </div>
       )}
 
       <Card className={view.from === "demo" ? "mt-5" : ""}>
-        <h2 className="text-xl">What kind of help do you need?</h2>
-        <p className="mt-2 text-ink-soft">
-          If you are not sure, leave this on &ldquo;All&rdquo; — or choose General, which is a good first
-          conversation when you do not yet know what to ask.
-        </p>
+        <h2 className="text-xl">{t("filterTitle")}</h2>
+        <p className="mt-2 text-ink-soft">{t("filterBody")}</p>
 
         <fieldset className="mt-5 border-0 p-0">
-          <legend className="sr-only">Filter lawyers by specialty</legend>
+          <legend className="sr-only">{t("filterLegend")}</legend>
           <div className="flex flex-wrap gap-2">
             {FILTERS.map((option) => {
               const chosen = filter === option;
@@ -138,7 +144,7 @@ export function LawyerList() {
                     onChange={() => setFilter(option)}
                     className="sr-only"
                   />
-                  {option}
+                  {option === "all" ? t("all") : specialtyLabel(option)}
                 </label>
               );
             })}
@@ -148,18 +154,17 @@ export function LawyerList() {
 
       {shown.length === 0 ? (
         <Card className="mt-5">
-          <h2 className="text-xl">Nobody listed for that yet</h2>
+          <h2 className="text-xl">{t("emptyTitle")}</h2>
           <p className="mt-3 text-ink-soft">
-            We do not have a lawyer on the panel for {filter.toLowerCase()} at the moment. Tell us what you need and
-            we will find somebody — it is what we do.
+            {t("emptyBody", { specialty: specialtyLabel(filter) })}
           </p>
           <Button
-            href={whatsappLink(`Hello, I am looking for a lawyer who works on ${filter.toLowerCase()}.`)}
+            href={whatsappLink(t("whatsapp.specialty", { specialty: specialtyLabel(filter) }))}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-6 w-full sm:w-auto"
           >
-            Tell us what you need
+            {t("emptyButton")}
           </Button>
         </Card>
       ) : (
@@ -177,94 +182,128 @@ export function LawyerList() {
       )}
 
       <Card className="mt-5">
-        <h2 className="text-xl">How paying works</h2>
-        <p className="mt-3 text-ink-soft">
-          The consultation price is for one conversation — long enough to understand your family&apos;s situation and
-          tell you what is actually needed. The full-case price covers the whole claim through to the money reaching
-          you, and is agreed in writing before anything starts.
-        </p>
-        <p className="mt-3 text-ink-soft">
-          Nothing is charged for asking. If a lawyer thinks you do not need one, they will say so.
-        </p>
+        <h2 className="text-xl">{t("payingTitle")}</h2>
+        <p className="mt-3 text-ink-soft">{t("payingBody")}</p>
+        <p className="mt-3 text-ink-soft">{t("payingBody2")}</p>
       </Card>
     </>
   );
-}
 
-/* ---------------------------------------------------------------- */
+  /* ---------------------------------------------------------------- */
 
-function LawyerCard({
-  lawyer,
-  status,
-  onAsk,
-}: {
-  lawyer: Lawyer;
-  status: Status;
-  onAsk: () => void;
-}) {
-  const languages = (lawyer.languages ?? []).filter(Boolean);
+  function LawyerCard({
+    lawyer,
+    status,
+    onAsk,
+  }: {
+    lawyer: Lawyer;
+    status: Status;
+    onAsk: () => void;
+  }) {
+    const languages = (lawyer.languages ?? []).filter(Boolean);
+    const consultation = rupees(lawyer.consultation_price_inr);
+    const fullCase = rupees(lawyer.full_case_price_inr);
 
-  return (
-    <Card className="h-full">
-      <div className="flex items-start gap-4">
-        <Portrait lawyer={lawyer} />
+    /*
+      A sample lawyer is described from the dictionary so the panel
+      reads in every language. A real lawyer's bio is shown as written,
+      because it is that person's own words.
+    */
+    const bio = isDemoLawyer(lawyer) ? t(`demoBios.${lawyer.id}`) : lawyer.bio;
 
-        <div className="min-w-0">
-          <h2 className="text-xl">{lawyer.name}</h2>
-          <p className="mt-1 text-sm text-ink-muted">
-            {[lawyer.specialty, lawyer.city].filter(Boolean).join(" · ") || "General practice"}
-          </p>
+    const subtitle =
+      [lawyer.specialty ? specialtyLabel(lawyer.specialty) : null, lawyer.city]
+        .filter(Boolean)
+        .join(" · ") || t("generalPractice");
+
+    return (
+      <Card className="h-full">
+        <div className="flex items-start gap-4">
+          <Portrait lawyer={lawyer} />
+
+          <div className="min-w-0">
+            {/* A name and a city are proper nouns, so they stay as written. */}
+            <h2 className="text-xl">{lawyer.name}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>
+          </div>
         </div>
-      </div>
 
-      {lawyer.bio && <p className="mt-4 text-ink-soft">{lawyer.bio}</p>}
+        {bio && <p className="mt-4 text-ink-soft">{bio}</p>}
 
-      <dl className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-        {lawyer.years_experience !== null && (
-          <Detail label="Years practising" value={`${lawyer.years_experience}`} />
-        )}
-        {languages.length > 0 && <Detail label="Speaks" value={languages.join(", ")} />}
-        <Detail label="One consultation" value={rupees(lawyer.consultation_price_inr)} />
-        <Detail label="The whole case" value={rupees(lawyer.full_case_price_inr)} />
-      </dl>
+        <dl className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          {lawyer.years_experience !== null && (
+            <Detail label={t("yearsLabel")} value={`${lawyer.years_experience}`} />
+          )}
+          {languages.length > 0 && <Detail label={t("speaksLabel")} value={languages.join(", ")} />}
+          <Detail label={t("consultationLabel")} value={consultation ?? t("onRequest")} />
+          <Detail label={t("fullCaseLabel")} value={fullCase ?? t("onRequest")} />
+        </dl>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        {status.kind === "whatsapp" ? (
-          <Button href={status.href} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-            Message us about {lawyer.name.replace(/^Adv\.\s*/, "")}
-          </Button>
-        ) : (
-          <Button
-            onClick={onAsk}
-            disabled={status.kind === "sending" || status.kind === "saved"}
-            className="w-full sm:w-auto"
-          >
-            {status.kind === "sending"
-              ? "One moment…"
-              : status.kind === "saved"
-                ? "Requested"
-                : "Request a consultation"}
-          </Button>
-        )}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {status.kind === "whatsapp" ? (
+            <Button
+              href={status.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              {t("messageAbout", { name: lawyer.name.replace(/^Adv\.\s*/, "") })}
+            </Button>
+          ) : (
+            <Button
+              onClick={onAsk}
+              disabled={status.kind === "sending" || status.kind === "saved"}
+              className="w-full sm:w-auto"
+            >
+              {status.kind === "sending"
+                ? t("requesting")
+                : status.kind === "saved"
+                  ? t("requested")
+                  : t("request")}
+            </Button>
+          )}
 
-        <RequestNote status={status} />
-      </div>
-    </Card>
-  );
+          <RequestNote status={status} />
+        </div>
+      </Card>
+    );
+  }
+
+  /* The quiet confirmation. Nothing has been charged. */
+  function RequestNote({ status }: { status: Status }) {
+    if (status.kind === "saved") {
+      return (
+        <p className="text-sm text-sage-800" role="status">
+          <span aria-hidden="true">✓ </span>
+          {t("savedNote")}
+        </p>
+      );
+    }
+
+    if (status.kind === "whatsapp") {
+      return (
+        <p className="text-sm text-ink-muted" role="status">
+          {t("whatsappNote")}
+        </p>
+      );
+    }
+
+    return null;
+  }
 }
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-sm text-ink-muted">{label}</dt>
-      <dd className="text-ink">{value}</dd>
+      <dd className="rtl-isolate text-ink">{value}</dd>
     </div>
   );
 }
 
 /*
-  A headshot if the panel has one, otherwise their initials. Never a
-  stock photograph of a stranger standing in for a real person.
+  A headshot if the panel has one, otherwise initials. Never a stock
+  photograph of a stranger standing in for a real person.
 */
 function Portrait({ lawyer }: { lawyer: Lawyer }) {
   const initials = lawyer.name
@@ -296,26 +335,4 @@ function Portrait({ lawyer }: { lawyer: Lawyer }) {
       {initials}
     </span>
   );
-}
-
-/* The calm confirmation. Deliberately quiet — nothing has been charged. */
-function RequestNote({ status }: { status: Status }) {
-  if (status.kind === "saved") {
-    return (
-      <p className="text-sm text-sage-800" role="status">
-        <span aria-hidden="true">✓ </span>
-        Asked for. One of us will be in touch — there is nothing more for you to do.
-      </p>
-    );
-  }
-
-  if (status.kind === "whatsapp") {
-    return (
-      <p className="text-sm text-ink-muted" role="status">
-        Easiest by message — the lawyer&apos;s name is already written in for you.
-      </p>
-    );
-  }
-
-  return null;
 }

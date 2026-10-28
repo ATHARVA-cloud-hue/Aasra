@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { ACCEPTED_TYPES, readDocument, type ReadResult } from "@/lib/ai/documentReader";
 
 /*
@@ -20,6 +21,10 @@ import { ACCEPTED_TYPES, readDocument, type ReadResult } from "@/lib/ai/document
 const MAX_BYTES = 15 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  // The dictionary for this request's language, so the two messages
+  // below are in whatever language the uploader is reading.
+  const t = await getTranslations("documents.reader");
+
   let payload: ReadResult;
 
   try {
@@ -27,12 +32,12 @@ export async function POST(request: Request) {
     const file = form.get("file");
 
     if (!(file instanceof File) || file.size === 0) {
-      return Response.json({ error: "Please choose a file first." }, { status: 400 });
+      return Response.json({ error: t("errorNoFile") }, { status: 400 });
     }
 
     if (file.size > MAX_BYTES) {
       return Response.json(
-        { error: "That file is larger than 15 MB. A normal phone photo is fine." },
+        { error: t("errorTooLarge") },
         { status: 413 },
       );
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
@@ -27,9 +28,9 @@ import {
 
   - A WRONG PASSWORD IS NOT AN ERROR MESSAGE, it is a nudge. It says
     that passwords are case-sensitive and that caps lock is worth
-    checking, and the two commonest mistakes — signing up with an email
-    that already exists, logging in without ever having signed up —
-    each name the toggle that fixes them.
+    checking, and the two commonest mistakes (signing up with an email
+    that already exists, logging in without ever having signed up) each
+    name the toggle that fixes them.
 
   - THE PASSWORD CAN BE SHOWN. Typing eight unseen characters on a
     phone, in the state people are in when they reach this page, is
@@ -43,6 +44,10 @@ import {
 type Mode = "login" | "create";
 
 export function EmailLogin() {
+  const t = useTranslations("login");
+  const tAuth = useTranslations("auth");
+  const tNav = useTranslations("nav");
+
   const router = useRouter();
   const auth = useAuth();
 
@@ -69,21 +74,28 @@ export function EmailLogin() {
     setConfirm(null);
 
     const result =
-      mode === "create" ? await createAccount(email, password, fullName) : await logIn(email, password);
+      mode === "create"
+        ? await createAccount(email, password, fullName)
+        : await logIn(email, password);
 
+    /*
+      The library hands back a message KEY, never a sentence. The
+      lookup happens here, which is what lets a wrong password read
+      correctly in five languages.
+    */
     if (result.status === "problem") {
       setBusy(false);
-      setProblem(result.message);
+      setProblem(tAuth(result.messageKey, { min: MIN_PASSWORD }));
       return;
     }
 
     // Account made, but it needs confirming before it can be used.
-    // Nothing has gone wrong, so this is not shown as a problem — and
+    // Nothing has gone wrong, so this is not shown as a problem, and
     // the form is left usable so they can log in once they are back.
     if (result.status === "confirm") {
       setBusy(false);
       setMode("login");
-      setConfirm(result.message);
+      setConfirm(tAuth(result.messageKey, { min: MIN_PASSWORD }));
       return;
     }
 
@@ -104,17 +116,16 @@ export function EmailLogin() {
   if (auth.status === "signed-in" && !auth.user.isAnonymous) {
     return (
       <Card>
-        <h2 className="text-xl">You are logged in</h2>
+        <h2 className="text-xl">{t("signedInTitle")}</h2>
         <p className="mt-2 text-ink-soft">
-          As {auth.user.email ?? "your account"}. Your case follows this account, so you can pick it up on your phone
-          or anyone else&apos;s computer.
+          {t("signedInBody", { email: auth.user.email ?? t("yourAccount") })}
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button href={FIRST_INTAKE_HREF} className="w-full sm:w-auto">
-            Carry on with my case
+            {t("carryOn")}
           </Button>
           <Button variant="secondary" className="w-full sm:w-auto" onClick={() => void signOut()}>
-            Log out
+            {tNav("logOut")}
           </Button>
         </div>
       </Card>
@@ -125,15 +136,9 @@ export function EmailLogin() {
   if (!canEmailSignIn) {
     return (
       <Card>
-        <h2 className="text-xl">Log in or create account</h2>
-        <p className="mt-2 text-ink-soft">
-          Accounts are not switched on in this copy of the app, so there is nothing to log in to yet. Nothing is
-          lost: carry on below and your answers are kept safely on this device.
-        </p>
-        <p className="mt-4 text-sm text-ink-muted">
-          When accounts are switched on, you will be able to make one with an email and a password, and reach your
-          case from any phone or computer.
-        </p>
+        <h2 className="text-xl">{t("notConfiguredTitle")}</h2>
+        <p className="mt-2 text-ink-soft">{t("notConfiguredBody")}</p>
+        <p className="mt-4 text-sm text-ink-muted">{t("notConfiguredNote")}</p>
       </Card>
     );
   }
@@ -142,12 +147,8 @@ export function EmailLogin() {
 
   return (
     <Card>
-      <h2 className="text-xl">{creating ? "Create your account" : "Log in"}</h2>
-      <p className="mt-2 text-ink-soft">
-        {creating
-          ? "An email and a password, and your case will follow you to any phone or computer you log in on."
-          : "Welcome back. Log in and your case will be where you left it."}
-      </p>
+      <h2 className="text-xl">{creating ? t("createTitle") : t("loginTitle")}</h2>
+      <p className="mt-2 text-ink-soft">{creating ? t("createBody") : t("loginBody")}</p>
 
       {/*
         Radio buttons under the pills, not plain <button>s: arrow keys
@@ -155,10 +156,10 @@ export function EmailLogin() {
         one either/or choice they are.
       */}
       <fieldset className="mt-6 border-0 p-0">
-        <legend className="sr-only">Do you already have an account?</legend>
+        <legend className="sr-only">{t("modeLegend")}</legend>
         <div className="flex flex-wrap gap-2">
-          <Toggle label="Log in" chosen={!creating} onPick={() => switchTo("login")} />
-          <Toggle label="Create account" chosen={creating} onPick={() => switchTo("create")} />
+          <Toggle label={t("modeLogin")} chosen={!creating} onPick={() => switchTo("login")} />
+          <Toggle label={t("modeCreate")} chosen={creating} onPick={() => switchTo("create")} />
         </div>
       </fieldset>
 
@@ -171,16 +172,17 @@ export function EmailLogin() {
       >
         <div>
           <label htmlFor="login-email" className="text-base font-medium text-ink">
-            Your email
+            {t("emailLabel")}
           </label>
           <input
             id="login-email"
             type="email"
             autoComplete="email"
             inputMode="email"
+            dir="ltr"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
+            placeholder={t("emailPlaceholder")}
             disabled={busy}
             className={box}
           />
@@ -189,28 +191,34 @@ export function EmailLogin() {
         <div>
           <div className="flex flex-wrap items-baseline justify-between gap-x-4">
             <label htmlFor="login-password" className="text-base font-medium text-ink">
-              Your password
+              {t("passwordLabel")}
             </label>
             <button
               type="button"
               onClick={() => setReveal((shown) => !shown)}
               className="text-sm text-sage-700 underline-offset-4 hover:underline"
             >
-              {reveal ? "Hide password" : "Show password"}
+              {reveal ? t("hidePassword") : t("showPassword")}
             </button>
           </div>
 
           {creating && (
             <p className="mt-1 text-sm text-ink-muted">
-              At least {MIN_PASSWORD} characters. A few ordinary words together is easier to remember than
-              something complicated, and harder to guess.
+              {t("passwordHint", { min: MIN_PASSWORD })}
             </p>
           )}
 
+          {/*
+            dir="ltr" on both credential boxes. An email address and a
+            password are typed left to right whatever the page
+            language, and a right-to-left box would put the cursor and
+            the @ sign in confusing places.
+          */}
           <input
             id="login-password"
             type={reveal ? "text" : "password"}
             autoComplete={creating ? "new-password" : "current-password"}
+            dir="ltr"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             disabled={busy}
@@ -221,18 +229,16 @@ export function EmailLogin() {
         {creating && (
           <div>
             <label htmlFor="login-name" className="text-base font-medium text-ink">
-              Your name
+              {t("nameLabel")}
             </label>
-            <p className="mt-1 text-sm text-ink-muted">
-              Optional, and only so we know what to call you when we write to you.
-            </p>
+            <p className="mt-1 text-sm text-ink-muted">{t("nameHint")}</p>
             <input
               id="login-name"
               type="text"
               autoComplete="name"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
-              placeholder="Leave blank if you would rather not"
+              placeholder={t("namePlaceholder")}
               disabled={busy}
               className={box}
             />
@@ -247,11 +253,11 @@ export function EmailLogin() {
         >
           {busy
             ? creating
-              ? "Creating your account…"
-              : "Logging you in…"
+              ? t("creating")
+              : t("loggingIn")
             : creating
-              ? "Create my account"
-              : "Log in"}
+              ? t("createButton")
+              : t("loginButton")}
         </Button>
       </form>
 
@@ -263,9 +269,7 @@ export function EmailLogin() {
         </p>
       )}
 
-      <p className="mt-5 text-sm text-ink-muted">
-        We use your email to find your case again, and for nothing else. No marketing, ever.
-      </p>
+      <p className="mt-5 text-sm text-ink-muted">{t("privacyNote")}</p>
     </Card>
   );
 }
@@ -295,13 +299,7 @@ function Toggle({
           : "border-sage-200 bg-paper text-sage-800 hover:border-sage-400 hover:bg-sage-50")
       }
     >
-      <input
-        type="radio"
-        name="login-mode"
-        checked={chosen}
-        onChange={onPick}
-        className="sr-only"
-      />
+      <input type="radio" name="login-mode" checked={chosen} onChange={onPick} className="sr-only" />
       {label}
     </label>
   );
@@ -309,8 +307,8 @@ function Toggle({
 
 /*
   Clay rather than red. It is almost always a mistyped password or the
-  wrong one of the two modes, neither of which deserves alarm — and the
-  brief rules out red anyway.
+  wrong one of the two modes, neither of which deserves alarm, and the
+  design rules out red anyway.
 */
 function Problem({ text }: { text: string | null }) {
   if (!text) return null;

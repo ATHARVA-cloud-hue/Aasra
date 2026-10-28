@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { ServiceStatus } from "@/lib/env";
 
@@ -30,6 +31,7 @@ import type { ServiceStatus } from "@/lib/env";
 type Mode = "demo" | "real" | "unknown";
 
 export function DemoModeBanner() {
+  const t = useTranslations("banner");
   const [status, setStatus] = useState<ServiceStatus | null>(null);
   const [mode, setMode] = useState<Mode>("unknown");
 
@@ -65,15 +67,9 @@ export function DemoModeBanner() {
     know, so it wins over everything else.
   */
   const message = (() => {
-    if (mode === "demo") {
-      return "You are exploring as a sample family. These are not real people, and nothing you enter is saved.";
-    }
-    if (status?.demoMode) {
-      return "Your answers are kept on this device only — the database is not connected yet.";
-    }
-    if (status && !status.ai) {
-      return "AI key not set — document reading and the assistant use pre-written sample answers.";
-    }
+    if (mode === "demo") return t("demoFamily");
+    if (status?.demoMode) return t("deviceOnly");
+    if (status && !status.ai) return t("noAi");
     return null;
   })();
 

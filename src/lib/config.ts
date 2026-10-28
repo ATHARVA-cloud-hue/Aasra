@@ -4,10 +4,6 @@
   update everywhere in the app.
 */
 
-export const APP_NAME = "Aasra";
-
-export const APP_TAGLINE = "Gentle help for families claiming what a loved one left behind.";
-
 /*
   ⚠️  REPLACE BEFORE LAUNCH  ⚠️
 
@@ -33,10 +29,12 @@ export const APP_TAGLINE = "Gentle help for families claiming what a loved one l
 export const WHATSAPP_NUMBER = "910000000000";
 export const WHATSAPP_DISPLAY = "+91 00000 00000 (demo)";
 
-export function whatsappLink(message = "Hello, I need some help with my family's case.") {
+/*
+  The message is required, never defaulted. A default would be one
+  English sentence that no dictionary covers, sent on behalf of
+  somebody reading the page in Urdu.
+*/
+export function whatsappLink(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-// The footer line the brief asks for, kept in one place.
-export const LEGAL_LINE =
-  "We are a technology and service platform, not a law firm. What you see here is guidance, not legal advice — a lawyer reviews anything legal before it is filed.";

@@ -1,8 +1,8 @@
 /*
   WHO INHERITS — a deliberately simple first pass.
 
-  This file takes what a family told us and works out who the law is
-  likely to treat as an heir, with a share and a plain-language reason.
+  This file takes what a family entered and works out who the law is
+  likely to treat as an heir, with a share and a reason.
 
   ------------------------------------------------------------------
   READ THIS BEFORE CHANGING ANYTHING HERE
@@ -11,7 +11,7 @@
   by whether there is a will, by whether property is ancestral, by
   which school of law a family follows, and by case law that moves.
   What is below is a SIMPLIFICATION, good enough to tell a family what
-  to expect and what to ask about — and nothing more than that.
+  to expect and what to ask about, and nothing more than that.
 
   Three rules this file holds to:
 
@@ -19,18 +19,31 @@
      lawyerVerified: false, and the screen shows that plainly. A
      lawyer checks it before anything is filed.
 
-  2. Where the real calculation is beyond a simple rule — Muslim
-     personal law especially — we do NOT invent fractions. We name the
-     likely heirs and say plainly that a lawyer works out the shares.
-     A confidently wrong fraction is far worse than an honest gap:
-     a family might divide money on the strength of it.
+  2. Where the real calculation is beyond a simple rule, Muslim
+     personal law especially, the app does NOT invent fractions. It
+     names the likely heirs and says plainly that a lawyer works out
+     the shares. A confidently wrong fraction is far worse than an
+     honest gap: a family might divide money on the strength of it.
 
-  3. We never guess at a fact we were not told. No spouse named means
-     no spouse in the result, not an assumed one.
+  3. The app never guesses at a fact it was not given. No spouse named
+     means no spouse in the result, not an assumed one.
 
-  It is a pure function: give it the same answers and it returns the
-  same result, with no database and no network. That makes it easy to
-  check by hand, which matters for something this consequential.
+  ------------------------------------------------------------------
+  WHY THIS FILE RETURNS KEYS, NOT SENTENCES
+  ------------------------------------------------------------------
+  It used to return English prose, assembled here. It cannot any more,
+  because the result has to read correctly in five languages.
+
+  So each result now carries the KEY of a message plus the VALUES that
+  message needs, and the screen looks the words up. Shares travel as a
+  numerator and a denominator rather than as "a third", because "a
+  third of the estate" cannot be translated by a dictionary lookup
+  while "1/3" can, and a numeral is plainer to read under stress.
+
+  It is still a pure function: give it the same answers and it returns
+  the same result, with no database, no network and no language. That
+  makes it easy to check by hand, which matters for something this
+  consequential.
 */
 
 /** Just the answers the calculation needs. A CaseRecord fits this. */
@@ -43,39 +56,52 @@ export type HeirInput = {
   has_will?: boolean | null;
 };
 
+/** A share as a plain fraction. 1/1 means the whole estate. */
+export type Fraction = { top: number; bottom: number };
+
 export type HeirShare = {
   name: string;
-  /** "Spouse", "Child", "Mother" — never guessed from a name. */
-  relation: string;
-  /** In plain words: "a third of the estate". Empty when not calculated. */
-  share: string;
-  /** Why this person is on the list. */
-  why: string;
+  /*
+    "spouse", "child" or "mother" — a key under heirs.relations, never
+    a label. We say spouse and child, never "wife", "son" or
+    "daughter": the app was never told anyone's gender, and a name is
+    not evidence of it. Getting that wrong on a page about somebody's
+    dead parent is not a small thing.
+  */
+  relationKey: "spouse" | "child" | "mother";
+  /** The share, or undefined when a lawyer has to set it. */
+  share?: Fraction;
+  /** Key under heirs.why, with the values that message needs. */
+  whyKey: string;
+  whyValues?: Record<string, string | number>;
 };
 
 export type HeirResult = {
   /*
     What kind of answer this is:
-      "will"       — there is a will, so we do not calculate at all
-      "shares"     — we can name heirs AND their shares
-      "names-only" — we can name likely heirs but NOT their shares
-      "nothing"    — we do not know enough about the family yet
+      "will"       — there is a will, so nothing is calculated
+      "shares"     — the app can name heirs AND their shares
+      "names-only" — likely heirs can be named, but NOT their shares
+      "nothing"    — not enough is known about the family yet
   */
   kind: "will" | "shares" | "names-only" | "nothing";
-  /** The law this is based on, named plainly. */
-  law: string;
-  /** One or two calm sentences covering the whole result. */
-  summary: string;
+  /** Key under law.acts: the law this result is based on. */
+  lawKey: ActKey;
+  /** Key under heirs.summary, with the values that message needs. */
+  summaryKey: string;
+  summaryValues?: Record<string, string | number>;
   heirs: HeirShare[];
   /** Always false. Only a lawyer's sign-off can change this. */
   lawyerVerified: false;
-  /** An extra warning worth showing prominently, if any. */
-  caution?: string;
+  /** Key under heirs.caution: an extra warning worth showing. */
+  cautionKey?: string;
 };
 
 /* ------------------------------------------------------------------ */
 /*  Which law applies                                                 */
 /* ------------------------------------------------------------------ */
+
+export type ActKey = "notKnown" | "toBeConfirmed" | "will" | "hindu" | "indian" | "muslim";
 
 /*
   The Hindu Succession Act covers Hindus, Sikhs, Buddhists and Jains.
@@ -88,74 +114,31 @@ const HINDU_SUCCESSION = ["hindu", "sikh", "buddhist", "jain"];
 const INDIAN_SUCCESSION = ["christian", "parsi", "other"];
 
 /*
-  Which law applies, on its own — before we know anything about the
+  Which law applies, on its own — before anything is known about the
   family. calculateHeirs() below needs names and relationships before
   it can say anything; this needs only the one answer.
 
-  It exists so a visitor who has chosen a faith and nothing else still
-  gets a real answer rather than "tell us more". The two share the
+  It exists so that somebody who has chosen a faith and nothing else
+  still gets a real answer rather than "tell us more". Both share the
   lists above, so they can never disagree about which Act applies.
 */
 export type ApplicableLaw = {
-  /** The Act, named plainly. */
-  law: string;
-  /** One or two calm sentences about what that means in practice. */
-  note: string;
+  /** Key under law.acts. */
+  actKey: ActKey;
+  /** Key under law.notes. */
+  noteKey: string;
 };
 
 export function lawForReligion(religion?: string | null): ApplicableLaw {
   const key = (religion ?? "").trim().toLowerCase();
 
-  if (!key) {
-    return {
-      law: "Not yet known",
-      note:
-        "Tell us which faith they followed and we can name the law that applies to your family, and what it " +
-        "means for how an estate is divided.",
-    };
-  }
-
-  if (key === "muslim") {
-    return {
-      law: "Muslim personal law (the Shariat Application Act, 1937)",
-      note:
-        "Shares are set by personal law rather than by a single Act of Parliament, and they depend on exactly " +
-        "which relatives survive and which school of law your family follows. We will name the likely heirs, " +
-        "but a lawyer who practises in this area works out each share — a confidently wrong fraction is far " +
-        "worse than an honest gap.",
-    };
-  }
-
-  if (HINDU_SUCCESSION.includes(key)) {
-    return {
-      law: "The Hindu Succession Act, 1956",
-      note:
-        "The Act covers Hindus, Sikhs, Buddhists and Jains — that is the Act's own definition, not a statement " +
-        "about these being one faith. Where there is no will, the closest family each take one equal share: a " +
-        "surviving spouse, every child, and a surviving mother alike. Sons and daughters inherit the same.",
-    };
-  }
-
-  if (INDIAN_SUCCESSION.includes(key)) {
-    return {
-      law: "The Indian Succession Act, 1925",
-      note:
-        "Where there is no will, a surviving spouse takes a third of the estate and the children share the " +
-        "remaining two thirds between them. With no children, the spouse inherits everything; with no spouse, " +
-        "the children share it equally.",
-    };
-  }
+  if (!key) return { actKey: "notKnown", noteKey: "notKnown" };
+  if (key === "muslim") return { actKey: "muslim", noteKey: "muslim" };
+  if (HINDU_SUCCESSION.includes(key)) return { actKey: "hindu", noteKey: "hindu" };
+  if (INDIAN_SUCCESSION.includes(key)) return { actKey: "indian", noteKey: "indian" };
 
   // "private", and anything a future list might add.
-  return {
-    law: "To be confirmed",
-    note:
-      key === "private"
-        ? "You would rather not say, which is completely your right. We can still show you the closest family, " +
-          "who are heirs under every one of India's succession laws — but which law sets the exact shares " +
-          "depends on that answer, so we leave the shares for a lawyer."
-        : "We will confirm which of India's succession laws applies to your family before anything is filed.",
-  };
+  return { actKey: "toBeConfirmed", noteKey: key === "private" ? "private" : "other" };
 }
 
 /* ------------------------------------------------------------------ */
@@ -166,30 +149,24 @@ export function calculateHeirs(input: HeirInput): HeirResult {
   const family = readFamily(input);
   const religion = (input.religion ?? "").toLowerCase();
 
-  // 1. A will overrides all of this. We do not compute anything.
+  // 1. A will overrides all of this. Nothing is computed.
   if (input.has_will === true) {
     return {
       kind: "will",
-      law: "The will itself",
-      summary:
-        "Because there is a will, it decides who inherits — not the general law. Our job now is different: " +
-        "we help you show the will is genuine, and get it accepted by the banks and offices that will ask for it.",
+      lawKey: "will",
+      summaryKey: "will",
       heirs: [],
       lawyerVerified: false,
-      caution:
-        "A will still has to be proved before it is acted on, and parts of one can be challenged. " +
-        "Bring it to us and a lawyer will read it with you.",
+      cautionKey: "will",
     };
   }
 
-  // 2. We cannot say anything useful without knowing the family.
+  // 2. Nothing useful can be said without knowing the family.
   if (family.length === 0) {
     return {
       kind: "nothing",
-      law: "Not yet known",
-      summary:
-        "Tell us about a spouse, children, or whether their mother is living, and we can show who the law " +
-        "treats as an heir.",
+      lawKey: "notKnown",
+      summaryKey: "nothing",
       heirs: [],
       lawyerVerified: false,
     };
@@ -199,20 +176,11 @@ export function calculateHeirs(input: HeirInput): HeirResult {
   if (religion === "muslim") {
     return {
       kind: "names-only",
-      law: "Muslim personal law (the Shariat Application Act, 1937)",
-      summary:
-        "These are the people most likely to be heirs. We have deliberately not put a share next to each name: " +
-        "under Muslim personal law the exact fractions depend on which relatives survive and which school of " +
-        "law your family follows, and getting that wrong would be worse than leaving it open.",
-      heirs: family.map((person) => ({
-        ...person,
-        share: "",
-        why: `${person.relation} of the person who died, and so an heir under Muslim personal law.`,
-      })),
+      lawKey: "muslim",
+      summaryKey: "muslim",
+      heirs: family.map((person) => ({ ...person, whyKey: "muslim" })),
       lawyerVerified: false,
-      caution:
-        "A lawyer who practises in this area works out each exact share. Please do not divide anything " +
-        "between yourselves on the strength of this page alone.",
+      cautionKey: "muslim",
     };
   }
 
@@ -220,84 +188,71 @@ export function calculateHeirs(input: HeirInput): HeirResult {
   if (!HINDU_SUCCESSION.includes(religion) && !INDIAN_SUCCESSION.includes(religion)) {
     return {
       kind: "names-only",
-      law: "To be confirmed",
-      summary:
-        religion === "private"
-          ? "You chose not to tell us their faith, which is completely your right. These are the closest " +
-            "family, who are heirs under every one of India's succession laws — but which law sets the exact " +
-            "shares depends on that answer, so we have left the shares open."
-          : "These are the closest family. Once we know which law applies to your family, we can show each " +
-            "person's share.",
-      heirs: family.map((person) => ({
-        ...person,
-        share: "",
-        why: `${person.relation} of the person who died, and among the closest family in law.`,
-      })),
+      lawKey: "toBeConfirmed",
+      summaryKey: religion === "private" ? "privateFaith" : "unknownFaith",
+      heirs: family.map((person) => ({ ...person, whyKey: "closest" })),
       lawyerVerified: false,
-      caution: "A lawyer confirms which law applies and what each share is.",
+      cautionKey: "confirmLaw",
     };
   }
 
-  // 5. Hindu Succession Act — spouse, each child, and a living mother
-  //    all take one equal share.
+  // 5. Hindu Succession Act — a surviving spouse, each child, and a
+  //    living mother all take one equal share.
   if (HINDU_SUCCESSION.includes(religion)) {
     const count = family.length;
-    const share = fractionWords(1, count);
+    const share = reduce({ top: 1, bottom: count });
 
     return {
       kind: "shares",
-      law: "The Hindu Succession Act, 1956",
-      summary:
-        `With no will, the estate is divided equally between the closest family — here that is ` +
-        `${count === 1 ? "one person" : `${numberWord(count)} people`}, so each takes ${share}.`,
+      lawKey: "hindu",
+      summaryKey: "hinduShares",
+      summaryValues: { count, top: share.top, bottom: share.bottom },
       heirs: family.map((person) => ({
         ...person,
         share,
-        why: equalShareReason(person.relation),
+        whyKey: equalShareWhyKey(person.relationKey),
       })),
       lawyerVerified: false,
-      caution: willCaution(input.has_will),
+      cautionKey: willCautionKey(input.has_will),
     };
   }
 
-  // 6. Indian Succession Act — the spouse's third, children's two thirds.
+  // 6. Indian Succession Act — the spouse's third, the children's two
+  //    thirds.
   return indianSuccession(family, input.has_will);
 }
 
 /* ------------------------------------------------------------------ */
 
 function indianSuccession(family: HeirShare[], hasWill?: boolean | null): HeirResult {
-  const law = "The Indian Succession Act, 1925";
-  const spouse = family.find((person) => person.relation === "Spouse");
-  const children = family.filter((person) => person.relation === "Child");
-  const caution = willCaution(hasWill);
+  const spouse = family.find((person) => person.relationKey === "spouse");
+  const children = family.filter((person) => person.relationKey === "child");
+  const cautionKey = willCautionKey(hasWill);
 
   // Spouse and children: a third to the spouse, two thirds shared.
   if (spouse && children.length > 0) {
-    const spouseShare = fractionWords(1, 3);
-    // Two thirds split between the children: 2/(3 × number of children).
-    const childShare = fractionWords(2, 3 * children.length);
+    const spouseShare: Fraction = { top: 1, bottom: 3 };
+    // Two thirds split between the children: 2/(3 x number of children).
+    const childShare = reduce({ top: 2, bottom: 3 * children.length });
 
     return {
       kind: "shares",
-      law,
-      summary:
-        `With no will, the surviving spouse takes ${spouseShare} and the children share the rest equally ` +
-        `between them.`,
+      lawKey: "indian",
+      summaryKey: "indianSpouseAndChildren",
       heirs: [
-        { ...spouse, share: spouseShare, why: `The surviving spouse takes a third of the estate under ${law}.` },
+        { ...spouse, share: spouseShare, whyKey: "spouseThird" },
         ...children.map((child) => ({
           ...child,
           share: childShare,
-          why:
+          whyKey: children.length === 1 ? "onlyChildTwoThirds" : "childrenShareTwoThirds",
+          whyValues:
             children.length === 1
-              ? `The only child takes the remaining two thirds.`
-              : `The children share the remaining two thirds equally — ${numberWord(children.length)} of them, ` +
-                `so ${childShare} each.`,
+              ? undefined
+              : { count: children.length, top: childShare.top, bottom: childShare.bottom },
         })),
       ],
       lawyerVerified: false,
-      caution,
+      cautionKey,
     };
   }
 
@@ -305,57 +260,54 @@ function indianSuccession(family: HeirShare[], hasWill?: boolean | null): HeirRe
   if (spouse && children.length === 0) {
     const others = family.filter((person) => person !== spouse);
 
+    if (others.length > 0) {
+      return {
+        kind: "names-only",
+        lawKey: "indian",
+        summaryKey: "indianSpouseAndOthers",
+        heirs: family.map((person) => ({ ...person, whyKey: "possible" })),
+        lawyerVerified: false,
+        cautionKey,
+      };
+    }
+
     return {
-      kind: others.length > 0 ? "names-only" : "shares",
-      law,
-      summary:
-        others.length > 0
-          ? "With no will and no children, the surviving spouse inherits — but you have also told us about " +
-            "another close relative, and where there is no child the Act's order between them depends on " +
-            "exactly who survives. We have left the shares for a lawyer to set."
-          : "With no will and no children, the whole estate goes to the surviving spouse.",
-      heirs:
-        others.length > 0
-          ? family.map((person) => ({ ...person, share: "", why: `${person.relation}, and a possible heir under ${law}.` }))
-          : [{ ...spouse, share: fractionWords(1, 1), why: `With no children, the spouse inherits everything under ${law}.` }],
+      kind: "shares",
+      lawKey: "indian",
+      summaryKey: "indianSpouseOnly",
+      heirs: [{ ...spouse, share: { top: 1, bottom: 1 }, whyKey: "spouseEverything" }],
       lawyerVerified: false,
-      caution,
+      cautionKey,
     };
   }
 
   // Children and no spouse: shared equally between them.
   if (children.length > 0) {
-    const share = fractionWords(1, children.length);
+    const share = reduce({ top: 1, bottom: children.length });
+    const only = children.length === 1;
+
     return {
       kind: "shares",
-      law,
-      summary:
-        children.length === 1
-          ? "With no will and no surviving spouse, the only child inherits the whole estate."
-          : `With no will and no surviving spouse, the estate is shared equally between the children.`,
+      lawKey: "indian",
+      summaryKey: only ? "indianOnlyChild" : "indianChildren",
       heirs: children.map((child) => ({
         ...child,
         share,
-        why:
-          children.length === 1
-            ? `The only child inherits everything under ${law}.`
-            : `The children inherit in equal parts under ${law}.`,
+        whyKey: only ? "onlyChildEverything" : "childrenEqual",
       })),
       lawyerVerified: false,
-      caution,
+      cautionKey,
     };
   }
 
-  // Neither spouse nor children — only a parent was mentioned.
+  // Neither spouse nor children — only a parent was named.
   return {
     kind: "names-only",
-    law,
-    summary:
-      "With no spouse and no children, the estate passes to the next closest relatives. The Act sets an order " +
-      "for this that depends on exactly who survives, so we have left the shares for a lawyer to set.",
-    heirs: family.map((person) => ({ ...person, share: "", why: `${person.relation}, and a possible heir under ${law}.` })),
+    lawKey: "indian",
+    summaryKey: "indianOther",
+    heirs: family.map((person) => ({ ...person, whyKey: "possible" })),
     lawyerVerified: false,
-    caution,
+    cautionKey,
   };
 }
 
@@ -363,35 +315,35 @@ function indianSuccession(family: HeirShare[], hasWill?: boolean | null): HeirRe
 /*  Reading the family out of the answers                             */
 /* ------------------------------------------------------------------ */
 
-/*
-  Note on wording: we say "Spouse" and "Child", never "Wife", "Son" or
-  "Daughter". We were never told anyone's gender, and a name is not
-  evidence of it. Getting that wrong on a page about someone's dead
-  parent is not a small thing.
-*/
 function readFamily(input: HeirInput): HeirShare[] {
   const family: HeirShare[] = [];
 
   const spouse = (input.spouse_name ?? "").trim();
   if (spouse) {
-    family.push({ name: spouse, relation: "Spouse", share: "", why: "" });
+    family.push({ name: spouse, relationKey: "spouse", whyKey: "" });
   }
 
   for (const child of splitNames(input.children_names)) {
-    family.push({ name: child, relation: "Child", share: "", why: "" });
+    family.push({ name: child, relationKey: "child", whyKey: "" });
   }
 
-  // Only a mother we were actually told is living. "Not sure" (null)
-  // is not a yes, so she is left off rather than assumed in.
+  /*
+    Only a mother the app was actually told is living. "Not sure"
+    (null) is not a yes, so the mother is left off rather than assumed
+    in.
+
+    The name is left empty when it was not given. The screen fills in
+    a translated stand-in, because "Their mother" cannot be assembled
+    here any more.
+  */
   if (input.mother_living === true) {
-    const name = (input.mother_name ?? "").trim();
-    family.push({ name: name || "Their mother", relation: "Mother", share: "", why: "" });
+    family.push({ name: (input.mother_name ?? "").trim(), relationKey: "mother", whyKey: "" });
   }
 
   return family;
 }
 
-/** "Arjun\nMeera" or "Arjun, Meera" → ["Arjun", "Meera"] */
+/** "Arjun\nMeera" or "Arjun, Meera" becomes ["Arjun", "Meera"] */
 function splitNames(value?: string | null): string[] {
   if (!value) return [];
   return value
@@ -400,82 +352,30 @@ function splitNames(value?: string | null): string[] {
     .filter(Boolean);
 }
 
-function equalShareReason(relation: string): string {
-  if (relation === "Spouse") return "A surviving spouse is a Class I heir, taking one equal share.";
-  if (relation === "Child") return "Each child is a Class I heir, taking one equal share — sons and daughters alike.";
-  if (relation === "Mother") return "A surviving mother is a Class I heir, taking one equal share.";
-  return "A Class I heir, taking one equal share.";
+function equalShareWhyKey(relation: HeirShare["relationKey"]): string {
+  if (relation === "spouse") return "equalSpouse";
+  if (relation === "child") return "equalChild";
+  if (relation === "mother") return "equalMother";
+  return "equalOther";
 }
 
 /** Shown when the family was not sure whether a will exists. */
-function willCaution(hasWill?: boolean | null): string | undefined {
-  if (hasWill === null || hasWill === undefined) {
-    return (
-      "You were not sure whether there is a will. If one turns up, it replaces everything on this page — " +
-      "so it is worth looking before anything is filed."
-    );
-  }
-  return undefined;
+function willCautionKey(hasWill?: boolean | null): string | undefined {
+  return hasWill === null || hasWill === undefined ? "unknownWill" : undefined;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Fractions, in words a grieving family can read                    */
+/*  Fractions                                                         */
 /* ------------------------------------------------------------------ */
-
-const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
-
-const DENOMINATOR_WORDS = [
-  "",
-  "whole",
-  "half",
-  "third",
-  "quarter",
-  "fifth",
-  "sixth",
-  "seventh",
-  "eighth",
-  "ninth",
-  "tenth",
-  "eleventh",
-  "twelfth",
-];
-
-export function numberWord(value: number): string {
-  return NUMBER_WORDS[value] ?? String(value);
-}
 
 function greatestCommonDivisor(a: number, b: number): number {
   return b === 0 ? a : greatestCommonDivisor(b, a % b);
 }
 
-/*
-  Turns 1/3 into "a third of the estate" and 2/9 into "two ninths of
-  the estate". Falls back to plain digits for anything unusual, which
-  is still correct — just less gentle to read.
-*/
-export function fractionWords(numerator: number, denominator: number): string {
-  if (denominator <= 0) return "";
+/** 2/6 becomes 1/3, so a share is always in its simplest form. */
+export function reduce(fraction: Fraction): Fraction {
+  if (fraction.bottom <= 0) return fraction;
 
-  const divisor = greatestCommonDivisor(numerator, denominator);
-  const top = numerator / divisor;
-  const bottom = denominator / divisor;
-
-  if (bottom === 1) return "the whole estate";
-
-  // "half of the estate" — never "a half of the estate".
-  if (bottom === 2 && top === 1) return "half of the estate";
-
-  if (bottom >= DENOMINATOR_WORDS.length || top >= NUMBER_WORDS.length) {
-    return `${top}/${bottom} of the estate`;
-  }
-
-  const name = DENOMINATOR_WORDS[bottom];
-
-  if (top === 1) {
-    // "an eighth", not "a eighth".
-    const article = /^[aeiou]/.test(name) ? "an" : "a";
-    return `${article} ${name} of the estate`;
-  }
-
-  return `${numberWord(top)} ${name}s of the estate`;
+  const divisor = greatestCommonDivisor(fraction.top, fraction.bottom) || 1;
+  return { top: fraction.top / divisor, bottom: fraction.bottom / divisor };
 }

@@ -4,6 +4,14 @@
   Last line of defence: used only if the root layout itself fails.
   It replaces the whole page, so it needs its own <html> and <body>
   and uses plain inline styles (the normal stylesheet may not load).
+
+  THIS ONE SCREEN IS ENGLISH ONLY, and that is deliberate rather than
+  an oversight. It renders in place of the root layout, which is where
+  the language cookie is read and the translations are provided. By the
+  time this appears, the thing that knows which language to use has
+  already failed. Hard-coding English is the only option that cannot
+  itself throw; reaching for a dictionary here could turn a recoverable
+  error into a blank page.
 */
 export default function GlobalError({ retry }: { error: unknown; retry: () => void }) {
   return (

@@ -12,12 +12,13 @@ import { openChat } from "@/lib/chatBus";
   thing that ships to the browser.
 */
 export function AskButton({
-  children = "Ask our assistant",
+  children,
   variant = "secondary",
   size,
   className = "",
 }: {
-  children?: string;
+  /* Required: the wording is always passed in from a dictionary. */
+  children: string;
   variant?: "primary" | "secondary" | "quiet";
   size?: "md" | "lg";
   className?: string;

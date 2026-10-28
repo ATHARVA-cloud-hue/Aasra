@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { prevStage, stageFor } from "@/lib/journey";
 import { StepPage } from "@/components/layout/StepPage";
 import { Button } from "@/components/ui/Button";
@@ -5,9 +7,9 @@ import { Card } from "@/components/ui/Card";
 import { CaseSummary } from "@/components/case/CaseSummary";
 
 /*
-  CASE TRACKER (Stage 7 in the README) — the last stage, and the page
-  a family comes back to. It has no "Continue": instead it offers the
-  quiet ways onward — a real person, or planning ahead.
+  THE CASE TRACKER — the last step, and the page a family returns to.
+  It has no "Continue". Instead it offers the ways onward: a lawyer, or
+  planning ahead.
 
   What a family sees here is read back from what they entered. The
   fictional sample family appears only in demo mode — see CaseSummary.
@@ -15,32 +17,34 @@ import { CaseSummary } from "@/components/case/CaseSummary";
 
 const STAGE = "/case";
 
-export default function CasePage() {
+export default async function CasePage() {
+  const t = await getTranslations();
   const stage = stageFor(STAGE);
   const previous = prevStage(STAGE);
 
   return (
     <StepPage
       stage={STAGE}
-      title={stage.title}
-      intro={stage.intro}
-      back={{ href: previous ? previous.href : "/", label: "Back to lost money" }}
-      footnote="Come back here any time to see where things stand. We will only ask for you when something genuinely needs you."
+      title={t(`stages.${stage.key}.title`)}
+      intro={t(`stages.${stage.key}.intro`)}
+      back={{
+        href: previous ? previous.href : "/",
+        label: t("case.backToLostMoney"),
+      }}
+      footnote={t("case.footnote")}
     >
       <CaseSummary />
 
       <Card className="mt-5">
-        <h2 className="text-xl">Whenever you need us</h2>
-        <p className="mt-2 text-ink-soft">
-          One of us can pick up where this page leaves off — no need to explain everything again.
-        </p>
+        <h2 className="text-xl">{t("case.helpTitle")}</h2>
+        <p className="mt-2 text-ink-soft">{t("case.helpBody")}</p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button href="/lawyers" className="w-full sm:w-auto">
-            Talk to a lawyer
+            {t("nav.talkToLawyer")}
           </Button>
           <Button href="/plan-ahead" variant="secondary" className="w-full sm:w-auto">
-            Plan ahead for my own family
+            {t("case.planAhead")}
           </Button>
         </div>
       </Card>
@@ -48,4 +52,7 @@ export default function CasePage() {
   );
 }
 
-export const metadata = { title: `${stageFor(STAGE).title} — your case tracker` };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t(`stages.${stageFor(STAGE).key}.title`) };
+}

@@ -28,5 +28,715 @@
     "startHere": "Start a claim",
     "planAhead": "Plan ahead",
     "copyright": "© {name}. Demo build. All names, families, and figures shown in the demo are fictional."
+  },
+  "common": {
+    "continue": "Continue",
+    "continueTo": "Continue to {stage}",
+    "back": "Back",
+    "backToStart": "Back to the home page",
+    "oneMoment": "One moment",
+    "saving": "Saving",
+    "progress": "Your progress"
+  },
+  "banner": {
+    "demoFamily": "You are using a sample family. These are not real people, and nothing you enter is saved.",
+    "deviceOnly": "Your answers are saved on this device only. The database is not connected.",
+    "noAi": "No AI key is set. Document reading and the assistant use pre-written sample answers."
+  },
+  "home": {
+    "condolence": "Our condolences on your loss.",
+    "title": "Claim what the deceased person left behind, step by step.",
+    "lead": "Use this app to claim the deceased person's bank accounts, insurance, EPF, shares, and property. The app takes you from the first form to the money reaching your family.",
+    "startClaim": "Start a claim",
+    "planAhead": "Plan ahead for your own family",
+    "reassurance": "Free to begin. No will needed. Stop and return at any time.",
+    "ask": {
+      "title": "Have a question right now?",
+      "body": "You do not have to start a claim to ask. Type the question in your own words. The assistant answers in plain language, at any hour.",
+      "button": "Ask the assistant"
+    },
+    "portals": {
+      "title": "Find accounts the family may not know about",
+      "body": "Search for forgotten bank accounts, unclaimed shares, provident fund, old insurance policies, and a business registered in the deceased person's name. The app opens the correct official page for each search and explains what to look for.",
+      "listLabel": "The portals this app takes you to",
+      "button": "Find lost money: government portals",
+      "safety": "Run each search yourself, on the official site, in your own browser. This app never asks for a password, a PIN, or a one-time code."
+    },
+    "howTitle": "How this app works",
+    "steps": {
+      "one": {
+        "title": "Step 1: Answer the questions",
+        "body": "Answer one question at a time. You can stop at any point. Your answers are saved automatically."
+      },
+      "two": {
+        "title": "Step 2: Add documents",
+        "body": "Upload a photo of any document. The app reads it and sorts the details for you. The app also helps find accounts the family may not know about."
+      },
+      "three": {
+        "title": "Step 3: Follow the checklist",
+        "body": "Get a clear list of what each bank or insurer requires. A lawyer reviews anything legal before it is filed."
+      }
+    },
+    "principle": {
+      "quote": "The app reads documents, prepares drafts, translates text, and sends reminders. Lawyers make all legal decisions.",
+      "note": "The assistant organises information and explains terms. A qualified lawyer approves anything legal before your family acts on it."
+    },
+    "situationsTitle": "Common situations",
+    "situations": {
+      "noWill": {
+        "title": "No will",
+        "body": "Most families do not have one. The law then decides who inherits. Start the claim in the same way."
+      },
+      "unknownAssets": {
+        "title": "Unknown accounts",
+        "body": "Old bank accounts, insurance, and EPF are often forgotten. Use the government portals to search for them."
+      },
+      "abroad": {
+        "title": "Living abroad",
+        "body": "Handle the claim from another country. The app arranges help on the ground in India."
+      },
+      "firstTime": {
+        "title": "First time",
+        "body": "No experience with banks or paperwork is needed. Every step is explained in plain words, and a lawyer is available."
+      },
+      "business": {
+        "title": "A business",
+        "body": "The deceased person may have run a shop, a firm, or a company. GST, licences, staff, and business accounts are handled too."
+      }
+    },
+    "closing": {
+      "title": "Start when you are ready",
+      "body": "Beginning takes a few minutes. Your answers are saved as you go."
+    }
+  },
+  "religion": {
+    "title": "Which faith did the deceased person follow?",
+    "body": "In India, this answer decides how an estate is divided. A Hindu family and a Christian family divide an estate under different laws. Choose one option to see the law that applies to your family.",
+    "legend": "Faith of the deceased person",
+    "note": "This answer is required by law, and it stays private. Choose \"Prefer not to say\" to see the rules that all of India's succession laws share.",
+    "options": {
+      "hindu": "Hindu",
+      "muslim": "Muslim",
+      "christian": "Christian",
+      "sikh": "Sikh",
+      "buddhist": "Buddhist",
+      "jain": "Jain",
+      "parsi": "Parsi",
+      "other": "Other",
+      "private": "Prefer not to say"
+    },
+    "oneMoment": "One moment"
+  },
+  "stages": {
+    "intake": {
+      "label": "Questions",
+      "title": "Step 1: Answer the questions",
+      "intro": "Answer one question at a time. You can stop at any point and return later. Your answers are saved automatically."
+    },
+    "documents": {
+      "label": "Documents",
+      "title": "Step 2: Add documents",
+      "intro": "Upload a photo of any document you have: a bank passbook, a policy, an Aadhaar card. If you have no documents yet, continue to the next step."
+    },
+    "heirs": {
+      "label": "Heirs",
+      "title": "Step 3: Check who inherits",
+      "intro": "Based on your answers, this page lists who the law treats as an heir. It also lists the documents each bank or insurer requires."
+    },
+    "hiddenAssets": {
+      "label": "Lost money",
+      "title": "Step 4: Search for lost money",
+      "intro": "Search the official government portals for forgotten bank accounts, old insurance policies, provident fund, and unclaimed shares."
+    },
+    "case": {
+      "label": "Your case",
+      "title": "Step 5: Track your case",
+      "intro": "See everything you have entered, what has been claimed, and what is still pending. Return to this page at any time."
+    }
+  },
+  "intake": {
+    "counter": "Question {current} of {total}",
+    "backAQuestion": "Previous question",
+    "footnote": "Your answers are saved as you go. This question has its own address ({path}). Bookmark it, close the page, and return to this exact question.",
+    "leaveBlank": "Not sure about an answer? Leave it blank and continue.",
+    "lastQuestion": "This is the last question.",
+    "options": {
+      "yes": "Yes",
+      "no": "No",
+      "unsure": "Not sure"
+    },
+    "save": {
+      "loading": "Looking for your answers",
+      "idle": "Your answers are saved automatically.",
+      "saving": "Saving",
+      "saved": "Saved. You can close this page and return at any time.",
+      "device": "Saved on this device. You can close this page and return at any time.",
+      "demo": "Sample family. Nothing is saved, so enter anything you like."
+    },
+    "steps": {
+      "1": {
+        "question": "Who are you claiming for?",
+        "help": "Enter the name of the deceased person and the relationship to you. Nothing else is needed now.",
+        "fields": {
+          "deceased_name": {
+            "label": "Full name of the deceased person",
+            "placeholder": "For example, Suresh Kumar Nair"
+          },
+          "relationship": {
+            "label": "Relationship to you",
+            "placeholder": "For example, father"
+          }
+        }
+      },
+      "2": {
+        "question": "When did the death occur?",
+        "help": "If you do not know the exact date, enter an approximate date. You can correct it later.",
+        "fields": {
+          "date_of_death": {
+            "label": "Date of death"
+          },
+          "place_of_death": {
+            "label": "Town or city",
+            "placeholder": "For example, Pune"
+          }
+        }
+      },
+      "3": {
+        "question": "Who is in the immediate family?",
+        "help": "These names decide who inherits. You can add more names at any time.",
+        "fields": {
+          "spouse_name": {
+            "label": "Name of the surviving spouse, if any",
+            "placeholder": "Leave blank if there is none"
+          },
+          "children_names": {
+            "label": "Names of the children",
+            "placeholder": "Enter one name per line"
+          }
+        }
+      },
+      "4": {
+        "question": "Which accounts do you already know about?",
+        "help": "Enter whatever you know. The app searches for the rest afterwards.",
+        "fields": {
+          "known_assets_note": {
+            "label": "Banks, insurers, or employers you know of",
+            "placeholder": "For example: SBI savings account, an LIC policy, employed at Tata Motors"
+          }
+        }
+      },
+      "5": {
+        "question": "Which faith did the deceased person follow?",
+        "help": "This answer is required by law. It stays private.",
+        "fields": {
+          "religion": {
+            "label": "Faith of the deceased person",
+            "note": "In India, the applicable inheritance law depends on this answer. A Hindu family and a Christian family divide an estate differently. This answer stays private, and you may choose not to give it."
+          }
+        }
+      },
+      "6": {
+        "question": "Was there a will?",
+        "help": "Most families in India have no will. If there is no will, the law decides who inherits.",
+        "fields": {
+          "has_will": {
+            "label": "Did the deceased person leave a will?",
+            "note": "If there is a will, the will decides who inherits, and the app helps prove the will is genuine. If there is no will, the law sets the shares. Choose \"Not sure\" if you do not know, and you can check together with a lawyer."
+          }
+        }
+      },
+      "7": {
+        "question": "Is the mother of the deceased person living?",
+        "help": "Under Hindu law a surviving mother inherits an equal share. Leaving the mother out would make the shares wrong.",
+        "fields": {
+          "mother_living": {
+            "label": "Is the mother of the deceased person living?"
+          },
+          "mother_name": {
+            "label": "Name of the mother, if known",
+            "placeholder": "Leave blank if unknown"
+          }
+        }
+      },
+      "8": {
+        "question": "Two final questions",
+        "help": "These two answers show whether extra paperwork is required, so that nothing comes as a surprise later.",
+        "fields": {
+          "assets_abroad": {
+            "label": "Did the deceased person own anything outside India?",
+            "note": "This includes a bank account, property, or a policy in another country. This adds steps to the claim, and all of them are manageable."
+          },
+          "owned_business": {
+            "label": "Did the deceased person run a business, or work for self?",
+            "note": "This includes a shop, a firm, a company, or freelance work. A business is handled differently from a salary."
+          }
+        }
+      }
+    }
+  },
+  "documents": {
+    "backToQuestions": "Back to the questions",
+    "footnote": "You can skip this step and return later. Skipping it does not block any other step.",
+    "helpfulTitle": "Which documents help most",
+    "helpful": {
+      "death": {
+        "name": "The death certificate",
+        "note": "Almost every bank requires this document."
+      },
+      "id": {
+        "name": "The deceased person's Aadhaar or PAN card",
+        "note": "Used to match accounts to the correct person."
+      },
+      "bank": {
+        "name": "A bank passbook or statement",
+        "note": "Even an old one shows where to look."
+      },
+      "insurance": {
+        "name": "Any insurance policy",
+        "note": "The policy number is the useful part."
+      },
+      "property": {
+        "name": "Property papers",
+        "note": "Only needed if property is involved."
+      },
+      "will": {
+        "name": "The will",
+        "note": "Most families do not have one. That is normal."
+      }
+    },
+    "reader": {
+      "dropTitle": "A photo is enough",
+      "dropBody": "Take the photo on a phone. A crooked photo, in any language, still works.",
+      "choose": "Choose a photo or PDF",
+      "limits": "Upload a death certificate, bank passbook, insurance policy, or Aadhaar card. Up to 15 MB.",
+      "readingTitle": "Reading your document",
+      "readingBody": "This takes a few seconds. Stay on this page.",
+      "unreadTitle": "The document could not be read",
+      "unreadBody": "Nothing is wrong with your document. The reader could not make it out. Type in whatever you can see below, or skip this step and continue.",
+      "filledTitle": "These details were filled in for you",
+      "filledBody": "Check each detail. Correct anything that is wrong, and clear any box that does not match the document.",
+      "filledDemo": "These are sample details for the demo. Your document was not read.",
+      "looksLike": "This looks like a {kind}.",
+      "savedTitle": "Added to your case",
+      "savedSupabase": "Saved. The details will be here when you return.",
+      "savedDevice": "Saved on this device, so nothing is lost.",
+      "savedDemo": "This is a sample family, so nothing was saved.",
+      "readAnother": "Read another document",
+      "save": "The details are correct: save them",
+      "tryAnother": "Try a different file",
+      "keepOnly": "Only the details above are kept. The photo itself is not stored.",
+      "notOnDocument": "Not on this document",
+      "errorRead": "That file could not be read. Try another photo.",
+      "errorOffline": "The server could not be reached. Your file has not been sent anywhere.",
+      "errorSuffix": "You can also continue without it.",
+      "fields": {
+        "person_name": "Full name of the deceased person",
+        "date_of_death": "Date of death",
+        "date_of_birth": "Date of birth",
+        "place": "Town or city",
+        "institution": "Bank, insurer, or office named",
+        "reference_number": "Account, policy, or certificate number"
+      },
+      "saving": "Saving",
+      "demoKind": "Death certificate (sample)",
+      "demoNotes": "Registered nine days after the date of death, which is well within the limit.",
+      "errorNoFile": "Choose a file first.",
+      "errorTooLarge": "That file is larger than 15 MB. A normal phone photo is fine."
+    }
+  },
+  "heirs": {
+    "backToDocuments": "Back to documents",
+    "footnote": "This result is based on your answers. A qualified lawyer checks it before anything is filed.",
+    "loading": "Working out who the law treats as an heir",
+    "pendingBadge": "Pending lawyer verification",
+    "titleWithShares": "Who inherits, and how much",
+    "titleNamesOnly": "Who is likely to be an heir",
+    "titleWill": "There is a will, so the will decides",
+    "basedOn": "Based on {law}",
+    "checklistTitle": "What each institution requires",
+    "nothingTitle": "Nothing to work out yet",
+    "nothingBody": "Enter the name of a surviving spouse, the children, or whether the mother of the deceased person is living. This page then lists who the law treats as an heir, and what each bank or insurer requires.",
+    "demoNotice": "This is a sample result, shown with a fictional family.",
+    "demoTitle": "Who the law treats as an heir",
+    "demoBody": "No will was found, so the estate is shared between the closest family in equal parts.",
+    "demoWhy": "Reason: with no will, the Hindu Succession Act gives the spouse, each child, and the mother an equal share.",
+    "relations": {
+      "spouse": "Spouse",
+      "child": "Child",
+      "mother": "Mother"
+    },
+    "share": {
+      "whole": "The whole estate",
+      "fraction": "{top}/{bottom} of the estate",
+      "lawyerSets": "A lawyer sets this share"
+    },
+    "summary": {
+      "will": "Because there is a will, the will decides who inherits, not the general law. The next job is different: the app helps you show the will is genuine, and helps get the will accepted by the banks and offices that ask for it.",
+      "nothing": "Enter the name of a surviving spouse, the children, or whether the mother of the deceased person is living. This page then shows who the law treats as an heir.",
+      "muslim": "These are the people most likely to be heirs. No share is shown next to each name, and that is deliberate. Under Muslim personal law the exact fractions depend on which relatives survive and which school of law the family follows. A wrong fraction would be worse than an open question.",
+      "privateFaith": "You chose not to give the faith of the deceased person, which is your right. These are the closest family, who are heirs under every one of India's succession laws. The exact shares depend on which law applies, so the shares are left open.",
+      "unknownFaith": "These are the closest family. Once the applicable law is known, this page shows each share.",
+      "hinduShares": "With no will, the estate is divided equally between the closest family. {count, plural, =1 {Here that is one heir, who takes the whole estate.} other {Here that is # heirs, so each heir takes {top}/{bottom} of the estate.}}",
+      "indianSpouseAndChildren": "With no will, the surviving spouse takes 1/3 of the estate. The children share the remaining 2/3 equally between them.",
+      "indianSpouseOnly": "With no will and no children, the whole estate goes to the surviving spouse.",
+      "indianSpouseAndOthers": "With no will and no children, the surviving spouse inherits. You have also entered another close relative, and where there is no child the order between them depends on exactly who survives. The shares are left for a lawyer to set.",
+      "indianOnlyChild": "With no will and no surviving spouse, the only child inherits the whole estate.",
+      "indianChildren": "With no will and no surviving spouse, the estate is shared equally between the children.",
+      "indianOther": "With no spouse and no children, the estate passes to the next closest relatives. The Act sets an order for this that depends on exactly who survives, so the shares are left for a lawyer to set."
+    },
+    "caution": {
+      "will": "A will still has to be proved before it is acted on, and parts of a will can be challenged. Bring the will to us and a lawyer will read it with you.",
+      "muslim": "A lawyer who practises in this area works out each exact share. Do not divide anything within the family on the strength of this page alone.",
+      "confirmLaw": "A lawyer confirms which law applies and what each share is.",
+      "unknownWill": "You were not sure whether a will exists. If a will is found, it replaces everything on this page, so search for one before anything is filed."
+    },
+    "why": {
+      "muslim": "{relation} of the deceased person, and so an heir under Muslim personal law.",
+      "closest": "{relation} of the deceased person, and among the closest family in law.",
+      "possible": "{relation} of the deceased person, and a possible heir under {law}.",
+      "equalSpouse": "A surviving spouse is a Class I heir, and takes one equal share.",
+      "equalChild": "Each child is a Class I heir, and takes one equal share. Sons and daughters inherit alike.",
+      "equalMother": "A surviving mother is a Class I heir, and takes one equal share.",
+      "equalOther": "A Class I heir, taking one equal share.",
+      "spouseThird": "The surviving spouse takes 1/3 of the estate under {law}.",
+      "onlyChildTwoThirds": "The only child takes the remaining 2/3 of the estate.",
+      "childrenShareTwoThirds": "The children share the remaining 2/3 equally between {count} of them, so {top}/{bottom} of the estate each.",
+      "spouseEverything": "With no children, the surviving spouse inherits everything under {law}.",
+      "onlyChildEverything": "The only child inherits everything under {law}.",
+      "childrenEqual": "The children inherit in equal parts under {law}."
+    },
+    "theMother": "The mother of the deceased person"
+  },
+  "law": {
+    "title": "What the law says for your family",
+    "lead": "Which law applies, who the law treats as an heir, and the papers each bank or office requires. Nothing here is settled until a lawyer has read it.",
+    "loading": "Working out which law applies",
+    "because": "Because the deceased person was {faith}",
+    "becausePrivate": "You chose not to give the faith of the deceased person",
+    "becauseUnknown": "The faith of the deceased person is not known yet",
+    "becauseGeneric": "Based on the faith you entered",
+    "demoNote": "You are using a sample family: a Hindu family from Pune. The law above is the one you chose, but the names and shares below belong to the sample family. Start your own claim to see this worked out for your family.",
+    "nextTitle": "To have the shares worked out",
+    "nextBody": "Enter a few details about the family: a surviving spouse, the children, and whether the mother of the deceased person is living. This page then fills in with real names and real shares.",
+    "startQuestions": "Answer a few questions",
+    "askAbout": "Ask a question about this",
+    "acts": {
+      "notKnown": "Not yet known",
+      "toBeConfirmed": "To be confirmed",
+      "will": "The will itself",
+      "hindu": "The Hindu Succession Act, 1956",
+      "indian": "The Indian Succession Act, 1925",
+      "muslim": "Muslim personal law (the Shariat Application Act, 1937)"
+    },
+    "notes": {
+      "notKnown": "Enter the faith of the deceased person. This page then names the law that applies to your family, and explains how an estate is divided under it.",
+      "hindu": "This Act covers Hindus, Sikhs, Buddhists, and Jains. That is the Act's own definition, not a statement about these being one faith. Where there is no will, the closest family each take one equal share: a surviving spouse, every child, and a surviving mother alike. Sons and daughters inherit the same.",
+      "indian": "Where there is no will, a surviving spouse takes 1/3 of the estate, and the children share the remaining 2/3 between them. With no children, the spouse inherits everything. With no spouse, the children share the estate equally.",
+      "muslim": "Shares are set by personal law rather than by a single Act of Parliament. The shares depend on exactly which relatives survive and which school of law the family follows. This app names the likely heirs, and a lawyer who practises in this area works out each share. A wrong fraction would be worse than an open question.",
+      "private": "You would rather not say, which is your right. This app can still show the closest family, who are heirs under every one of India's succession laws. Which law sets the exact shares depends on that answer, so the shares are left for a lawyer.",
+      "other": "The app confirms which of India's succession laws applies to your family before anything is filed."
+    }
+  },
+  "hiddenAssets": {
+    "backToHeirs": "Back to who inherits",
+    "footnote": "Run these searches in any order, or skip them and return later. Anything you find is added to your case, so you do not have to remember it twice.",
+    "howTitle": "How this step works",
+    "howBody": "Each search below is on a government or regulator site. Run each search yourself, in your own browser. The app opens the correct page and explains what to look for.",
+    "safety": "This app never asks you for a password, a PIN, or a one-time code. No honest service needs those to search for money that belongs to your family. If any service asks for them, stop and walk away.",
+    "howFound": "Found something? Type it into the box under that search. It is then added to your case.",
+    "searchCounter": "Search {current} of {total}",
+    "openSite": "Open the official site",
+    "opensInNewTab": "Opens in a new tab: {url}",
+    "foundLabel": "Did you find anything? Enter it here.",
+    "foundHelp": "Whatever you can see is enough: a bank name, an amount, or a reference number.",
+    "addToCase": "Add this to my case",
+    "adding": "Adding",
+    "addedSupabase": "Added to your case.",
+    "addedDevice": "Added, and saved on this device for now.",
+    "addedDemo": "Added. In demo mode nothing is saved.",
+    "alsoTitle": "Also worth checking",
+    "alsoBody": "Two more places where families often find something. There are no buttons here, because an address we have not confirmed is how people end up on a convincing fake site.",
+    "registries": {
+      "udgam": {
+        "name": "Forgotten bank accounts",
+        "what": "A single search across India's banks, run by the Reserve Bank. When an account sits untouched for ten years, the money is moved to the RBI and listed here.",
+        "why": "Most families never learn about an old account in another city, or one opened decades ago before a move. This is the one place that searches every bank at once.",
+        "placeholder": "For example: an SBI account in Nashik, ₹42,000, reference UDG123456"
+      },
+      "iepf": {
+        "name": "Shares and unpaid dividends",
+        "what": "The government's Investor Education and Protection Fund. After seven years unclaimed, company shares and their dividends are transferred here, and they can be claimed back.",
+        "why": "Shares bought on paper in the 1980s or 1990s are easy for a family to miss. Such shares do not expire, and are often worth far more now than when they were bought.",
+        "placeholder": "For example: 200 shares in Tata Steel, folio A0012345"
+      },
+      "epfo": {
+        "name": "Provident fund",
+        "what": "The Employees' Provident Fund Organisation holds retirement savings from every job the deceased person held, along with a pension and a linked insurance payout.",
+        "why": "Money is often left behind at an employer from years ago. The family of someone who was still working may also be owed a pension and an insurance amount nobody told them about.",
+        "placeholder": "For example: UAN 100123456789, from the years at Tata Motors"
+      },
+      "irdai": {
+        "name": "Life insurance policies",
+        "what": "The insurance regulator. This site explains how to trace a policy and lists every licensed insurer, with the complaint route if an insurer does not answer you.",
+        "why": "Families often know a policy existed but cannot find the paperwork. A policy that lapsed, or matured and was never collected, still belongs to the family.",
+        "placeholder": "For example: an LIC policy, number 4471xxxx, taken around 2005"
+      },
+      "mca": {
+        "name": "Companies the deceased person was part of",
+        "what": "The government's register of every company in India. The free \"View Company / LLP Master Data\" and \"View Signatory Details\" searches show which companies a person was a director or a signatory of.",
+        "why": "A shareholding in a small private company is the asset families miss most often, because no statement arrives in the post to remind anyone it exists. A company set up decades ago is still on this register.",
+        "placeholder": "For example: a director of a private company registered in Pune, CIN on the certificate"
+      },
+      "udyam": {
+        "name": "A business in the deceased person's name",
+        "what": "The official registration portal for small and medium businesses. \"Print / Verify Udyam Registration Certificate\" confirms a registration and shows what was registered.",
+        "why": "A registered business can hold a bank account, a GST number, a lease, and unpaid invoices. A business also carries obligations as well as value, so knowing it exists stops the family being surprised a year later.",
+        "placeholder": "For example: a Udyam registration for a tailoring shop, number on the certificate"
+      }
+    },
+    "alsoWorthChecking": {
+      "mutualFunds": {
+        "name": "Mutual funds",
+        "why": "Old folios held under a previous address or an earlier phone number."
+      },
+      "postOffice": {
+        "name": "Post office savings",
+        "why": "Small savings schemes and recurring deposits, often opened decades ago."
+      }
+    }
+  },
+  "case": {
+    "backToLostMoney": "Back to lost money",
+    "footnote": "Return to this page at any time to see where each claim stands. The app contacts you only when something genuinely needs you.",
+    "loading": "Gathering everything you have entered",
+    "personTitle": "The deceased person",
+    "personName": "Full name",
+    "personRelationship": "Relationship to you",
+    "personDate": "Date of death",
+    "personPlace": "Town or city",
+    "familyTitle": "The immediate family",
+    "knownTitle": "What you entered",
+    "trackedTitle": "What is being tracked",
+    "anAsset": "An asset",
+    "weFound": "Found by the app",
+    "youTold": "Entered by you",
+    "nothingTitle": "Nothing here yet",
+    "nothingBody": "Answer a few of the questions and this page fills in: the deceased person, the family, and where each claim stands.",
+    "nothingBody2": "Answer one question, close the page, and return when you are ready.",
+    "demoNotice": "You are using a sample family. Everything below is fictional.",
+    "demoNowTitle": "What is happening now",
+    "helpTitle": "When you need help",
+    "helpBody": "A lawyer can continue from where this page leaves off. You do not have to explain everything again.",
+    "planAhead": "Plan ahead for your own family",
+    "child": "Child"
+  },
+  "lawyers": {
+    "title": "Talk to a lawyer",
+    "lead": "These lawyers handle this work every day. Choose one and request a conversation. You do not need your documents, or a clear question, to start.",
+    "loading": "Finding lawyers who work with families like yours",
+    "demoNotice": "This is a sample panel. These are not real practitioners. Use the button and one of our team answers instead.",
+    "filterTitle": "What kind of help do you need?",
+    "filterBody": "If you are not sure, leave this on \"All\". You can also choose General, which is a good first conversation when you do not yet know what to ask.",
+    "filterLegend": "Filter lawyers by specialty",
+    "all": "All",
+    "specialties": {
+      "hindu": "Hindu succession",
+      "muslim": "Muslim personal law",
+      "christian": "Christian/Parsi succession",
+      "property": "Property disputes",
+      "general": "General"
+    },
+    "generalPractice": "General practice",
+    "yearsLabel": "Years practising",
+    "speaksLabel": "Speaks",
+    "consultationLabel": "One consultation",
+    "fullCaseLabel": "The whole case",
+    "onRequest": "On request",
+    "request": "Request a consultation",
+    "requesting": "One moment",
+    "requested": "Requested",
+    "messageAbout": "Message us about {name}",
+    "savedNote": "Requested. One of our team will contact you. There is nothing more for you to do.",
+    "whatsappNote": "Send a message instead. The lawyer's name is already filled in for you.",
+    "emptyTitle": "No lawyer listed for that yet",
+    "emptyBody": "There is no lawyer on the panel for {specialty} at the moment. Tell us what you need and we will find one.",
+    "emptyButton": "Tell us what you need",
+    "payingTitle": "How paying works",
+    "payingBody": "The consultation price covers one conversation, long enough to understand the family's situation and explain what is actually needed. The full-case price covers the whole claim through to the money reaching you, and is agreed in writing before any work starts.",
+    "payingBody2": "Asking costs nothing. If a lawyer thinks you do not need one, the lawyer says so.",
+    "notSure": "I would rather just talk to someone",
+    "whatsapp": {
+      "consultation": "Hello, I would like a consultation with {name}{city}. Please tell me what to do next.",
+      "inCity": " in {city}",
+      "specialty": "Hello, I am looking for a lawyer who works on {specialty}.",
+      "unsure": "Hello, I am not sure which lawyer I need. Could someone help me choose?",
+      "general": "Hello, I need some help with my family's case."
+    },
+    "demoBios": {
+      "demo-1": "Works almost entirely with families after a death: succession certificates, bank transmission, and the paperwork a municipal office requires. Happy to speak to elderly parents directly.",
+      "demo-2": "Calculates shares under Muslim personal law, including where the family follows a particular school, and explains the result to everyone involved before anything is divided.",
+      "demo-3": "Handles probate and letters of administration under the Indian Succession Act, and the extra steps a family living outside India runs into. Takes calls across time zones.",
+      "demo-4": "Handles ancestral land, jointly held flats, and cases where one relative will not sign. Will say plainly when a dispute is not worth fighting.",
+      "demo-5": "A good first conversation if you do not yet know what kind of help you need. Covers nominee claims, EPF, and insurance, and will say honestly when no lawyer is needed at all."
+    }
+  },
+  "login": {
+    "title": "Start your claim",
+    "lead": "You do not need any documents to start. Answer what you can, skip what you cannot, and your place is saved as you go.",
+    "orWithout": "Or, if you would rather not create an account",
+    "ratherLawyer": "I would rather talk to a lawyer",
+    "signedInTitle": "You are logged in",
+    "signedInBody": "Logged in as {email}. Your case follows this account, so you can continue on your phone or on another computer.",
+    "yourAccount": "your account",
+    "carryOn": "Continue with my case",
+    "notConfiguredTitle": "Log in or create account",
+    "notConfiguredBody": "Accounts are not switched on in this copy of the app, so there is nothing to log in to. Nothing is lost: continue below and your answers are saved on this device.",
+    "notConfiguredNote": "When accounts are switched on, you will be able to create one with an email and a password, and reach your case from any phone or computer.",
+    "createTitle": "Create your account",
+    "createBody": "Enter an email and a password. Your case then follows you to any phone or computer you log in on.",
+    "loginTitle": "Log in",
+    "loginBody": "Log in and your case will be where you left it.",
+    "modeLegend": "Do you already have an account?",
+    "modeLogin": "Log in",
+    "modeCreate": "Create account",
+    "emailLabel": "Your email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Your password",
+    "passwordHint": "Use at least {min} characters. A few ordinary words together are easier to remember than something complicated, and harder to guess.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "nameLabel": "Your name",
+    "nameHint": "Optional. Used only to know how to address you in messages.",
+    "namePlaceholder": "Leave blank if you would rather not",
+    "createButton": "Create my account",
+    "creating": "Creating your account",
+    "loginButton": "Log in",
+    "loggingIn": "Logging you in",
+    "privacyNote": "Your email is used to find your case again, and for nothing else. No marketing.",
+    "noAccountTitle": "Continue without an account",
+    "noAccountBody": "Answer what you can and your place is saved on this device. You can close the page and return at any time, and create an account later to reach your case from your phone.",
+    "noAccountButton": "Start my family's claim",
+    "demoTitle": "Look around first",
+    "demoBody": "Walk through every step with a sample family, to see how the app works before entering anything of your own.",
+    "demoButton": "Continue as a demo family"
+  },
+  "auth": {
+    "notConfigured": "Accounts are not switched on in this copy of the app. You can continue: your answers are saved on this device.",
+    "offline": "The server could not be reached. It may be your connection. Try again in a moment.",
+    "badEmail": "That does not look like an email address. Check it over.",
+    "noPassword": "Enter your password as well.",
+    "shortPassword": "Your password needs at least {min} characters. Longer is better than complicated.",
+    "confirmNeeded": "Your account is created. Before you can log in, open the email that has just been sent and follow the link in it. Then return here and log in with the same password.",
+    "alreadyRegistered": "An account with that email already exists, which is good news. Switch to \"Log in\" above and enter the password.",
+    "wrongPassword": "That email and password do not match. Passwords are case-sensitive, so check whether caps lock is on. If you have never created an account, choose \"Create account\" above.",
+    "notConfirmed": "This account is not confirmed yet. Open the email sent at sign-up and follow the link in it, then return and log in.",
+    "rateLimited": "That is a few attempts in quick succession. Wait a minute, then try once more.",
+    "signupsDisabled": "New accounts are switched off at the moment. You can continue without one: your answers are saved on this device.",
+    "generic": "That did not work, and it is very likely our fault rather than yours. Try once more."
+  },
+  "planAhead": {
+    "title": "Planning ahead is coming soon",
+    "lead": "Soon you will be able to leave your family a clear list, so that no one has to search. For now the app is focused on families who have just lost someone.",
+    "includeTitle": "What it will include",
+    "include": {
+      "list": "A simple list of your accounts, policies, and nominees.",
+      "nominee": "A reminder when a nominee is missing, which is the single biggest cause of delay.",
+      "sealed": "One sealed summary your family can open when it is needed."
+    },
+    "alreadyTitle": "If you have already lost someone",
+    "alreadyBody": "Start a claim instead, and the app guides you through every step.",
+    "startHere": "Start a claim"
+  },
+  "chat": {
+    "launch": "Ask a question",
+    "panelTitle": "Ask a question",
+    "panelSubtitle": "Plain answers, at any hour.",
+    "close": "Close",
+    "greeting": "Ask anything about claiming what your family is owed: what a document means, what a bank requires, or what to do next.",
+    "suggestions": {
+      "one": "What is a succession certificate?",
+      "two": "What do I do first?",
+      "three": "Which documents does a bank need?"
+    },
+    "thinking": "Thinking",
+    "inputPlaceholder": "Type your question",
+    "inputLabel": "Your question",
+    "send": "Send",
+    "disclaimer": "Guidance, not legal advice. A lawyer checks anything legal.",
+    "errorServer": "Something went wrong at our end. Try again, or talk to a lawyer instead.",
+    "errorNetwork": "The server could not be reached. It may be your connection. Try again in a moment.",
+    "errorEmpty": "Type a question first.",
+    "errorTooLong": "That question is very long. Shorten it a little.",
+    "canned": {
+      "succession": "A succession certificate is a document from a civil court stating who may collect a person's money and investments. Banks often require one when there was no will and no nominee. It usually takes a few months. A lawyer prepares the application, and the app can arrange that for you.",
+      "probate": "Probate is a court confirming that a will is genuine, so that banks and offices will act on it. Probate is only needed where there is a will. A lawyer handles the filing, and the app explains what it involves.",
+      "legalHeir": "A legal heir certificate is a local government document naming the close family of a deceased person. It is quicker and cheaper than a succession certificate, though some banks will not accept it on its own. The tehsil or municipal office issues it.",
+      "bank": "For a bank claim you usually need the death certificate, your own ID, the bank's claim form, and the passbook or account number. If you are named as nominee the claim is fairly quick. If not, the bank may require a succession certificate. The app tells you which applies once the account is known.",
+      "insurance": "For a life insurance claim the insurer normally requires the original policy, the death certificate, the insurer's claim form, and proof of the bank account the money should go to. If the policy document is lost, the insurer can trace it from the policy number or from the deceased person's details.",
+      "providentFund": "Provident fund money is claimed from EPFO using forms 20, 5-IF, and 10-D, along with the death certificate and Aadhaar. There is often a pension and an insurance amount owed too, which families are rarely told about.",
+      "start": "Start with the death certificate. Almost every office requires it, and nothing else moves without it. After that, answer whatever questions you can in this app, and the app works out who needs to be told and in what order.",
+      "howLong": "It varies. A bank claim with a nominee can take a few weeks. A claim needing a court certificate usually takes three to six months. Insurance is often six to eight weeks. The app tells you what is waiting on whom, so that silence never feels like nothing is happening.",
+      "shares": "Shares cannot be worked out here. The answer depends on which law applies to your family and whether there was a will, and a wrong answer would be serious. Answer the questions in this app and the app sets it out for you, with a lawyer confirming it before anything is filed.",
+      "will": "If there is a will, the will decides who inherits rather than the general law. The will has to be shown to be genuine first, which is what probate does. Bring the will to us and a lawyer will read it with you and explain it plainly.",
+      "documents": "The death certificate is the document everything depends on. Beyond that you usually need the deceased person's ID, your own ID, and whatever paperwork relates to the account or policy: a passbook, a statement, or a policy number. Even a photo of an old document helps.",
+      "fallback": "That cannot be answered just now. You can ask what a document means, what a bank or insurer requires, or what the next step is. To talk to a lawyer instead, use the link at the bottom of this panel."
+    }
+  },
+  "errors": {
+    "crashTitle": "This page did not load properly",
+    "crashBody": "This is our fault, not yours. Your progress is saved. Try again in a moment.",
+    "crashBodyShort": "Your progress is saved. Try again in a moment.",
+    "tryAgain": "Try again",
+    "notFoundTitle": "That page could not be found",
+    "notFoundBody": "Nothing is lost. Your progress is saved. Use the button below to return."
+  },
+  "demo": {
+    "claims": {
+      "savings": {
+        "what": "Savings account",
+        "where": "State Bank of India",
+        "status": "Needs your signature"
+      },
+      "insurance": {
+        "what": "Life insurance",
+        "where": "LIC policy 4471xxxx",
+        "status": "With the insurer"
+      },
+      "providentFund": {
+        "what": "Provident fund",
+        "where": "EPFO",
+        "status": "With the office"
+      },
+      "deathCertificate": {
+        "what": "Death certificate",
+        "where": "Municipal corporation",
+        "status": "Received"
+      }
+    },
+    "heirRelations": {
+      "spouse": "Spouse",
+      "son": "Son",
+      "daughter": "Daughter",
+      "mother": "Mother"
+    },
+    "equalShare": "One equal share",
+    "checklist": {
+      "bank": {
+        "place": "The bank",
+        "needs": "Death certificate, your ID, the bank's claim form, and a nominee letter or succession certificate."
+      },
+      "insurer": {
+        "place": "The insurer",
+        "needs": "Original policy, death certificate, claim form, and proof of your bank account."
+      },
+      "epfo": {
+        "place": "EPFO (provident fund)",
+        "needs": "Forms 20, 5-IF, and 10-D, death certificate, and Aadhaar."
+      },
+      "shares": {
+        "place": "Shares and mutual funds",
+        "needs": "A transmission request, death certificate, and a notarised affidavit."
+      }
+    }
   }
 }

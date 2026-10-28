@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { onOpenChat } from "@/lib/chatBus";
 
@@ -28,17 +29,14 @@ import { onOpenChat } from "@/lib/chatBus";
 
 type Message = { role: "user" | "model"; text: string };
 
-const GREETING =
-  "Ask me anything about claiming what your family is owed — what a document means, what a bank will want, or " +
-  "simply what to do next.";
-
-const SUGGESTIONS = [
-  "What is a succession certificate?",
-  "What do I do first?",
-  "Which documents does a bank need?",
-];
+/** Keys under chat.suggestions. */
+const SUGGESTIONS = ["one", "two", "three"];
 
 export function ChatAssistant() {
+  const t = useTranslations("chat");
+  const tNav = useTranslations("nav");
+  const locale = useLocale();
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
@@ -88,7 +86,12 @@ export function ChatAssistant() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history }),
+        /*
+          The language goes with the question so the assistant answers
+          in it, and so the pre-written fallbacks come back in the
+          right language when no AI key is set.
+        */
+        body: JSON.stringify({ message: text, history, locale }),
       });
 
       const data = (await response.json()) as { reply?: string; error?: string };
@@ -97,10 +100,7 @@ export function ChatAssistant() {
         ...current,
         {
           role: "model",
-          text:
-            data.reply ??
-            data.error ??
-            "Something went wrong at our end. Please try again, or talk to one of us instead.",
+          text: data.reply ?? data.error ?? t("errorServer"),
         },
       ]);
     } catch {
@@ -108,8 +108,7 @@ export function ChatAssistant() {
         ...current,
         {
           role: "model",
-          text:
-            "I could not reach our server just then — it may be your connection. Please try again in a moment.",
+          text: t("errorNetwork"),
         },
       ]);
     } finally {
@@ -123,11 +122,11 @@ export function ChatAssistant() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Ask a question"
-        className="fixed bottom-5 right-5 z-40 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-sage-600 px-5 py-3 text-base font-medium text-white shadow-lg transition-colors duration-300 hover:bg-sage-700"
+        aria-label={t("launch")}
+        className="fixed bottom-5 end-5 z-40 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-sage-600 px-5 py-3 text-base font-medium text-white shadow-lg transition-colors duration-300 hover:bg-sage-700"
       >
         <span aria-hidden="true">?</span>
-        Ask a question
+        {t("launch")}
       </button>
     );
   }
@@ -138,18 +137,18 @@ export function ChatAssistant() {
       ref={panelRef}
       role="dialog"
       aria-modal="false"
-      aria-label="Ask a question"
-      className="animate-fade-in fixed inset-x-3 bottom-3 z-40 flex max-h-[80vh] flex-col overflow-hidden rounded-3xl border border-line bg-paper shadow-2xl sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-[25rem]"
+      aria-label={t("panelTitle")}
+      className="animate-fade-in fixed inset-x-3 bottom-3 z-40 flex max-h-[80vh] flex-col overflow-hidden rounded-3xl border border-line bg-paper shadow-2xl sm:inset-x-auto sm:end-5 sm:bottom-5 sm:w-[25rem]"
     >
       <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
         <div>
-          <p className="font-serif text-lg text-ink">Ask a question</p>
-          <p className="text-sm text-ink-muted">Plain answers, any time of night.</p>
+          <p className="font-serif text-lg text-ink">{t("panelTitle")}</p>
+          <p className="text-sm text-ink-muted">{t("panelSubtitle")}</p>
         </div>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          aria-label="Close"
+          aria-label={t("close")}
           className="shrink-0 rounded-xl px-3 py-2 text-xl leading-none text-ink-muted transition-colors hover:bg-cream hover:text-ink"
         >
           <span aria-hidden="true">×</span>
@@ -157,18 +156,18 @@ export function ChatAssistant() {
       </header>
 
       <div className="flex-1 overflow-y-auto px-5 py-4">
-        <p className="text-ink-soft">{GREETING}</p>
+        <p className="text-ink-soft">{t("greeting")}</p>
 
         {messages.length === 0 && (
           <div className="mt-4 space-y-2">
-            {SUGGESTIONS.map((suggestion) => (
+            {SUGGESTIONS.map((key) => (
               <button
-                key={suggestion}
+                key={key}
                 type="button"
-                onClick={() => void send(suggestion)}
-                className="block w-full rounded-2xl border border-sage-200 bg-paper px-4 py-2.5 text-left text-base text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-50"
+                onClick={() => void send(t(`suggestions.${key}`))}
+                className="block w-full rounded-2xl border border-sage-200 bg-paper px-4 py-2.5 text-start text-base text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-50"
               >
-                {suggestion}
+                {t(`suggestions.${key}`)}
               </button>
             ))}
           </div>
@@ -180,8 +179,8 @@ export function ChatAssistant() {
               key={index}
               className={
                 message.role === "user"
-                  ? "ml-6 rounded-2xl bg-sage-600 px-4 py-2.5 text-white"
-                  : "mr-6 rounded-2xl bg-cream px-4 py-2.5 text-ink"
+                  ? "ms-6 rounded-2xl bg-sage-600 px-4 py-2.5 text-white"
+                  : "me-6 rounded-2xl bg-cream px-4 py-2.5 text-ink"
               }
             >
               {message.text}
@@ -189,8 +188,8 @@ export function ChatAssistant() {
           ))}
 
           {pending && (
-            <p className="mr-6 rounded-2xl bg-cream px-4 py-2.5 text-ink-muted" role="status">
-              Thinking…
+            <p className="me-6 rounded-2xl bg-cream px-4 py-2.5 text-ink-muted" role="status">
+              {t("thinking")}
             </p>
           )}
         </div>
@@ -211,8 +210,8 @@ export function ChatAssistant() {
             type="text"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="Type your question…"
-            aria-label="Your question"
+            placeholder={t("inputPlaceholder")}
+            aria-label={t("inputLabel")}
             className="min-h-12 flex-1 rounded-2xl border border-line bg-cream px-4 py-2.5 text-base text-ink placeholder:text-ink-muted focus:border-sage-400"
           />
           <button
@@ -220,14 +219,18 @@ export function ChatAssistant() {
             disabled={!draft.trim() || pending}
             className="min-h-12 shrink-0 rounded-2xl bg-sage-600 px-4 py-2.5 text-base font-medium text-white transition-colors hover:bg-sage-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Send
+            {t("send")}
           </button>
         </div>
 
         <p className="mt-3 text-sm text-ink-muted">
-          Guidance, not legal advice — a lawyer checks anything legal.{" "}
-          <Link href="/lawyers" onClick={() => setOpen(false)} className="text-sage-700 underline underline-offset-4">
-            Talk to a lawyer
+          {t("disclaimer")}{" "}
+          <Link
+            href="/lawyers"
+            onClick={() => setOpen(false)}
+            className="text-sage-700 underline underline-offset-4"
+          >
+            {tNav("talkToLawyer")}
           </Link>
         </p>
       </form>

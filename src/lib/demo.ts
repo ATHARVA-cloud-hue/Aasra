@@ -13,6 +13,11 @@ import type { CaseRecord } from "@/lib/caseStore";
   getMode() === "demo" first, and only then reach for these.
 
   (This is a type-only import, so the database layer is not pulled in.)
+
+  ON LANGUAGES: the names, places and institutions below stay as they
+  are in all five languages, because they are proper nouns. What the
+  screens say ABOUT them is looked up from messages/*.json, by the keys
+  in this file.
 */
 
 /** The fictional family behind "Continue as a demo family". */
@@ -21,7 +26,7 @@ export const DEMO_CASE: CaseRecord = {
   relationship: "father",
   date_of_death: "2024-03-02",
   place_of_death: "Pune",
-  religion: "Hindu",
+  religion: "hindu",
   has_will: false,
   assets_abroad: false,
   owned_business: false,
@@ -30,7 +35,7 @@ export const DEMO_CASE: CaseRecord = {
   // Matches the four-person sample on the heirs page.
   mother_living: true,
   mother_name: "Sarasvati Nair",
-  known_assets_note: "SBI savings account, an LIC policy, he worked at Tata Motors",
+  known_assets_note: "SBI savings account, an LIC policy, employed at Tata Motors",
 };
 
 /*
@@ -43,58 +48,51 @@ export const DEMO_CASE: CaseRecord = {
   stranger's name and a fake certificate number typed into their own
   case, ready to save. Sample data now only ever comes from this file,
   and only ever after a getMode() check.
+
+  document_kind and extra_notes are looked up from
+  demo.documentFields.* rather than stored here, because those two are
+  sentences rather than proper nouns.
 */
-export const DEMO_DOCUMENT_FIELDS = {
-  document_kind: "Death certificate (sample)",
+export const DEMO_DOCUMENT_FACTS = {
   person_name: "Suresh Kumar Nair",
   date_of_death: "2024-03-02",
   date_of_birth: "1958-07-14",
   place: "Pune",
   institution: "Pune Municipal Corporation",
   reference_number: "PMC/DC/2024/018842",
-  extra_notes: "Registered nine days after the date of death, which is well within the limit.",
 };
 
 export type DemoTone = "waiting" | "moving" | "done";
 
-/** The tracker rows on the "Your case" page. */
-export const DEMO_CLAIMS: { what: string; where: string; status: string; tone: DemoTone }[] = [
-  { what: "Savings account", where: "State Bank of India", status: "Needs your signature", tone: "waiting" },
-  { what: "Life insurance", where: "LIC policy 4471xxxx", status: "With the insurer", tone: "moving" },
-  { what: "Provident fund", where: "EPFO", status: "With the office", tone: "moving" },
-  { what: "Death certificate", where: "Municipal corporation", status: "Received", tone: "done" },
+/*
+  The tracker rows on the "Your case" page. `id` is the key under
+  demo.claims; `tone` decides the colour.
+*/
+export const DEMO_CLAIMS: { id: string; tone: DemoTone }[] = [
+  { id: "savings", tone: "waiting" },
+  { id: "insurance", tone: "moving" },
+  { id: "providentFund", tone: "moving" },
+  { id: "deathCertificate", tone: "done" },
 ];
 
-/** The heir result on the "Who inherits" page. */
+/*
+  The heir result on the "Who inherits" page. The relation is a key
+  under demo.heirRelations.
+
+  These four say "Son" and "Daughter" where the real engine
+  deliberately says "Child". That is not an inconsistency: this is a
+  fictional family whose genders we invented, so naming them is safe.
+  For a real family the app was never told, and would not guess.
+*/
 export const DEMO_HEIRS = [
-  { who: "Lakshmi Nair", relation: "Wife", share: "One equal share" },
-  { who: "Arjun Nair", relation: "Son", share: "One equal share" },
-  { who: "Meera Nair", relation: "Daughter", share: "One equal share" },
-  { who: "Sarasvati Nair", relation: "Mother", share: "One equal share" },
+  { who: "Lakshmi Nair", relation: "spouse" },
+  { who: "Arjun Nair", relation: "son" },
+  { who: "Meera Nair", relation: "daughter" },
+  { who: "Sarasvati Nair", relation: "mother" },
 ];
 
-export const DEMO_HEIRS_WHY =
-  "Why: with no will, the Hindu Succession Act gives the wife, children and mother an equal share each.";
-
-/** What each institution asks for. True for any family, so not really "sample". */
-export const CLAIM_CHECKLIST = [
-  {
-    place: "The bank",
-    needs: "Death certificate, your ID, their claim form, and a nominee letter or succession certificate.",
-  },
-  {
-    place: "The insurer",
-    needs: "Original policy, death certificate, claim form, and proof of your bank account.",
-  },
-  {
-    place: "EPFO (provident fund)",
-    needs: "Forms 20, 5-IF and 10-D, death certificate, and Aadhaar.",
-  },
-  {
-    place: "Shares and mutual funds",
-    needs: "A transmission request, death certificate, and a notarised affidavit.",
-  },
-];
+/** What each institution asks for. Keys under demo.checklist. */
+export const CLAIM_CHECKLIST = ["bank", "insurer", "epfo", "shares"];
 
 /** How the tracker colours each status. */
 export const TONE_CLASSES: Record<DemoTone, string> = {

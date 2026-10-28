@@ -23,14 +23,15 @@ import { getSupabase, hasSupabaseKeys } from "@/lib/supabase/client";
   practitioner they could ring tomorrow.
 */
 
-/** The specialties we sort the panel by. Also the filter buttons. */
-export const SPECIALTIES = [
-  "Hindu succession",
-  "Muslim personal law",
-  "Christian/Parsi succession",
-  "Property disputes",
-  "General",
-] as const;
+/*
+  The specialties the panel is filtered by, as stable slugs.
+
+  Slugs rather than labels, deliberately. A lawyer's specialty is
+  stored in the database and compared against this list, so the stored
+  value has to mean the same thing in every language. The words shown
+  on the filter buttons come from lawyers.specialties.<slug>.
+*/
+export const SPECIALTIES = ["hindu", "muslim", "christian", "property", "general"] as const;
 
 export type Specialty = (typeof SPECIALTIES)[number];
 
@@ -43,12 +44,20 @@ export type Lawyer = {
   /** One of SPECIALTIES. Free text in the database so the panel can grow. */
   specialty: string | null;
   city: string | null;
-  /** The languages they can hold a difficult conversation in. */
+  /** The languages a difficult conversation can be held in. */
   languages: string[] | null;
   years_experience: number | null;
   /** Whole rupees, not paise. Null means "ask us". */
   consultation_price_inr: number | null;
   full_case_price_inr: number | null;
+  /*
+    The lawyer's own description of their practice, as written in the
+    database. Shown as it was entered, in whatever language it was
+    written in, because it is a person's own words rather than part of
+    the app. A demo lawyer has null here and is described from
+    lawyers.demoBios.<id> instead, so the sample panel reads correctly
+    in all five languages.
+  */
   bio: string | null;
 };
 
@@ -63,79 +72,82 @@ const LAWYER_COLUMNS =
 /*
   Five fictional lawyers, one per specialty, with a spread of prices so
   a family can see that the panel is not all one price bracket.
+
+  Each has bio: null. The description shown on the card comes from
+  lawyers.demoBios.<id> in the dictionaries, so the sample panel reads
+  correctly in all five languages. Names, cities and languages stay as
+  they are, being proper nouns.
 */
 export const DEMO_LAWYERS: Lawyer[] = [
   {
     id: "demo-1",
     name: "Adv. Rukmini Deshpande",
     photo_url: null,
-    specialty: "Hindu succession",
+    specialty: "hindu",
     city: "Pune",
     languages: ["Marathi", "Hindi", "English"],
     years_experience: 18,
     consultation_price_inr: 1500,
     full_case_price_inr: 35000,
-    bio:
-      "Works almost entirely with families after a death — succession certificates, bank transmission and the " +
-      "paperwork a municipal office asks for. Happy to speak to elderly parents directly.",
+    bio: null,
   },
   {
     id: "demo-2",
     name: "Adv. Imran Qureshi",
     photo_url: null,
-    specialty: "Muslim personal law",
+    specialty: "muslim",
     city: "Hyderabad",
     languages: ["Urdu", "Telugu", "Hindi", "English"],
     years_experience: 22,
     consultation_price_inr: 2000,
     full_case_price_inr: 48000,
-    bio:
-      "Calculates shares under Muslim personal law, including where the family follows a particular school, and " +
-      "explains the result to everyone involved before anything is divided.",
+    bio: null,
   },
   {
     id: "demo-3",
     name: "Adv. Maria Fernandes",
     photo_url: null,
-    specialty: "Christian/Parsi succession",
+    specialty: "christian",
     city: "Mumbai",
     languages: ["English", "Konkani", "Hindi"],
     years_experience: 14,
     consultation_price_inr: 1800,
     full_case_price_inr: 42000,
-    bio:
-      "Probate and letters of administration under the Indian Succession Act, and the extra steps a family living " +
-      "outside India runs into. Takes calls across time zones.",
+    bio: null,
   },
   {
     id: "demo-4",
     name: "Adv. Harpreet Singh Bedi",
     photo_url: null,
-    specialty: "Property disputes",
+    specialty: "property",
     city: "Delhi",
     languages: ["Punjabi", "Hindi", "English"],
     years_experience: 26,
     consultation_price_inr: 2500,
     full_case_price_inr: 65000,
-    bio:
-      "Ancestral land, flats held jointly, and the cases where one relative will not sign. Will say plainly when a " +
-      "dispute is not worth fighting.",
+    bio: null,
   },
   {
     id: "demo-5",
     name: "Adv. Lakshmi Iyer",
     photo_url: null,
-    specialty: "General",
+    specialty: "general",
     city: "Chennai",
     languages: ["Tamil", "Malayalam", "English"],
     years_experience: 9,
     consultation_price_inr: 900,
     full_case_price_inr: 24000,
-    bio:
-      "A good first conversation if you do not yet know what kind of help you need. Nominee claims, EPF and " +
-      "insurance, and she will tell you honestly when no lawyer is needed at all.",
+    bio: null,
   },
 ];
+
+/*
+  True for one of the five sample lawyers above. Those have no bio of
+  their own, so the card describes them from lawyers.demoBios.<id>.
+*/
+export function isDemoLawyer(lawyer: Lawyer): boolean {
+  return lawyer.id.startsWith("demo-");
+}
 
 /** Where a list of lawyers came from, so the page can label itself honestly. */
 export type LawyerSource = "supabase" | "demo";
@@ -231,12 +243,10 @@ export async function requestConsultation(lawyer: Lawyer): Promise<ConsultationO
 
     // A demo lawyer has no row in the table to point at, so the
     // request goes through as a name only.
-    const isRealRow = !lawyer.id.startsWith("demo-");
-
     const { rememberedCaseId } = await import("@/lib/caseStore");
 
     const { error } = await supabase.from("consultations").insert({
-      lawyer_id: isRealRow ? lawyer.id : null,
+      lawyer_id: isDemoLawyer(lawyer) ? null : lawyer.id,
       // Kept as plain text too, so the request still makes sense if the
       // lawyer later leaves the panel.
       lawyer_name: lawyer.name,
@@ -258,8 +268,16 @@ export async function requestConsultation(lawyer: Lawyer): Promise<ConsultationO
 
 /* ------------------------------------------------------------------ */
 
-/** "₹1,500" in Indian digit grouping, or "On request" when unpriced. */
-export function rupees(amount: number | null | undefined): string {
-  if (amount === null || amount === undefined) return "On request";
+/*
+  "₹1,500" in Indian digit grouping, or null when there is no price,
+  which the card shows as a translated "On request".
+
+  The grouping stays en-IN in every language on purpose. Indian
+  grouping (1,50,000 rather than 150,000) is what a reader in India
+  expects whichever language the page is in, and leaving the digits as
+  Latin numerals keeps a price recognisable next to the ₹ sign.
+*/
+export function rupees(amount: number | null | undefined): string | null {
+  if (amount === null || amount === undefined) return null;
   return `₹${amount.toLocaleString("en-IN")}`;
 }

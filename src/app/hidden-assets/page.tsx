@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { nextStage, prevStage, stageFor } from "@/lib/journey";
 import { StepPage } from "@/components/layout/StepPage";
 import { RegistryList } from "@/components/hidden-assets/RegistryList";
 
 /*
-  HIDDEN ASSET FINDER (Stage 6 in the README).
+  THE HIDDEN ASSET FINDER.
 
   The official registries most families never think to check, each with
   a link to the real government site and a place to report what was
@@ -13,7 +15,8 @@ import { RegistryList } from "@/components/hidden-assets/RegistryList";
 
 const STAGE = "/hidden-assets";
 
-export default function HiddenAssetsPage() {
+export default async function HiddenAssetsPage() {
+  const t = await getTranslations();
   const stage = stageFor(STAGE);
   const next = nextStage(STAGE);
   const previous = prevStage(STAGE);
@@ -21,15 +24,28 @@ export default function HiddenAssetsPage() {
   return (
     <StepPage
       stage={STAGE}
-      title={stage.title}
-      intro={stage.intro}
-      back={{ href: previous ? previous.href : "/", label: "Back to who inherits" }}
-      next={next ? { href: next.href, label: `Continue to ${next.label.toLowerCase()}` } : undefined}
-      footnote="You can do these searches in any order, or skip them and come back. Anything you find is added to your case so you never have to remember it twice."
+      title={t(`stages.${stage.key}.title`)}
+      intro={t(`stages.${stage.key}.intro`)}
+      back={{
+        href: previous ? previous.href : "/",
+        label: t("hiddenAssets.backToHeirs"),
+      }}
+      next={
+        next
+          ? {
+              href: next.href,
+              label: t("common.continueTo", { stage: t(`stages.${next.key}.label`) }),
+            }
+          : undefined
+      }
+      footnote={t("hiddenAssets.footnote")}
     >
       <RegistryList />
     </StepPage>
   );
 }
 
-export const metadata = { title: `${stageFor(STAGE).title} — the hidden asset finder` };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations();
+  return { title: t(`stages.${stageFor(STAGE).key}.title`) };
+}

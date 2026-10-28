@@ -184,12 +184,19 @@ export function isRealAccount(state: AuthState): boolean {
 //  Creating an account, and logging in
 // ---------------------------------------------------------------------------
 
-const NOT_CONFIGURED =
-  "Accounts are not switched on in this copy of the app yet. You can still carry on — " +
-  "your answers are kept safely on this device.";
+/*
+  WHY THESE RETURN KEYS AND NOT SENTENCES
+
+  Every outcome below carries the KEY of a message under the "auth"
+  namespace, not the message itself. The login form looks the words up,
+  which is what lets a wrong password read correctly in five languages.
+
+  Supabase's own error strings stay in English in the console, where
+  they are useful, and never reach the screen.
+*/
 
 /*
-  The shortest password we accept. Supabase's own floor is lower, so
+  The shortest password accepted. Supabase's own floor is lower, so
   this is ours and is checked before the call goes out: telling someone
   their password is too short after a round trip, with the box already
   cleared, is a small cruelty.
@@ -197,26 +204,17 @@ const NOT_CONFIGURED =
 export const MIN_PASSWORD = 8;
 
 /*
-  The one check both forms share. Returns the thing to say, or null when
-  there is nothing wrong.
+  The one check both forms share. Returns the key of the thing to say,
+  or null when there is nothing wrong.
 
   Done here as well as in the browser's own validation because either
   form can be submitted by pressing Enter before the browser has had
   its say.
 */
 function credentialProblem(email: string, password: string, requireLength: boolean): string | null {
-  if (!email.trim().includes("@")) {
-    return "That does not look like an email address. Could you check it over?";
-  }
-
-  if (!password) {
-    return "Please put in your password as well.";
-  }
-
-  if (requireLength && password.length < MIN_PASSWORD) {
-    return `Your password needs to be at least ${MIN_PASSWORD} characters. Longer is better than complicated.`;
-  }
-
+  if (!email.trim().includes("@")) return "badEmail";
+  if (!password) return "noPassword";
+  if (requireLength && password.length < MIN_PASSWORD) return "shortPassword";
   return null;
 }
 
@@ -229,11 +227,13 @@ function credentialProblem(email: string, password: string, requireLength: boole
   logged in, and nothing has gone wrong either. Calling that an error
   would be a lie, and calling it success would strand them on a page
   that thinks they are logged in when they are not.
+
+  messageKey is a key under the "auth" namespace in every dictionary.
 */
 export type AuthResult =
   | { status: "done" }
-  | { status: "confirm"; message: string }
-  | { status: "problem"; message: string };
+  | { status: "confirm"; messageKey: string }
+  | { status: "problem"; messageKey: string };
 
 export async function createAccount(
   email: string,
@@ -241,10 +241,10 @@ export async function createAccount(
   fullName?: string,
 ): Promise<AuthResult> {
   const problem = credentialProblem(email, password, true);
-  if (problem) return { status: "problem", message: problem };
+  if (problem) return { status: "problem", messageKey: problem };
 
   const supabase = getSupabase();
-  if (!supabase) return { status: "problem", message: NOT_CONFIGURED };
+  if (!supabase) return { status: "problem", messageKey: "notConfigured" };
 
   try {
     const { data, error } = await supabase.auth.signUp({
@@ -254,25 +254,18 @@ export async function createAccount(
 
     if (error) {
       console.error("Could not create an account:", error.message);
-      return { status: "problem", message: friendlyAuthMessage(error.message) };
+      return { status: "problem", messageKey: authMessageKey(error.message) };
     }
 
     // Account made, but no session: confirmations are switched on, so
-    // there is an email on its way and nothing more we can do here.
-    if (!data.session) {
-      return {
-        status: "confirm",
-        message:
-          "Your account is made. Before you can log in, open the email we have just sent and follow the link in " +
-          "it — then come back here and log in with the same password.",
-      };
-    }
+    // there is an email on its way and nothing more to do here.
+    if (!data.session) return { status: "confirm", messageKey: "confirmNeeded" };
 
     await upsertProfile(fullName);
     return { status: "done" };
   } catch (error) {
     console.error("Could not create an account:", error instanceof Error ? error.message : error);
-    return { status: "problem", message: OFFLINE };
+    return { status: "problem", messageKey: "offline" };
   }
 }
 
@@ -284,10 +277,10 @@ export async function logIn(email: string, password: string): Promise<AuthResult
     their own case over a rule we invented after they joined.
   */
   const problem = credentialProblem(email, password, false);
-  if (problem) return { status: "problem", message: problem };
+  if (problem) return { status: "problem", messageKey: problem };
 
   const supabase = getSupabase();
-  if (!supabase) return { status: "problem", message: NOT_CONFIGURED };
+  if (!supabase) return { status: "problem", messageKey: "notConfigured" };
 
   try {
     const { error } = await supabase.auth.signInWithPassword({
@@ -297,14 +290,14 @@ export async function logIn(email: string, password: string): Promise<AuthResult
 
     if (error) {
       console.error("Could not log in:", error.message);
-      return { status: "problem", message: friendlyAuthMessage(error.message) };
+      return { status: "problem", messageKey: authMessageKey(error.message) };
     }
 
     await upsertProfile();
     return { status: "done" };
   } catch (error) {
     console.error("Could not log in:", error instanceof Error ? error.message : error);
-    return { status: "problem", message: OFFLINE };
+    return { status: "problem", messageKey: "offline" };
   }
 }
 
@@ -373,19 +366,18 @@ export async function signOut(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-//  Turning Supabase's words into ours
+//  Turning Supabase's words into our message keys
 // ---------------------------------------------------------------------------
-
-const OFFLINE =
-  "We could not reach our server just then — it may be your connection. Please try again in a moment.";
 
 /*
   Matched on keywords rather than exact strings, because Supabase's
-  wording changes between versions and a missed match must never leak
-  a developer message onto this screen. Anything unrecognised falls
+  wording changes between versions and a missed match must never leak a
+  developer message onto this screen. Anything unrecognised falls
   through to a calm, honest line.
+
+  Returns a key under the "auth" namespace, never a sentence.
 */
-export function friendlyAuthMessage(raw: string): string {
+export function authMessageKey(raw: string): string {
   const message = raw.toLowerCase();
 
   /*
@@ -396,46 +388,44 @@ export function friendlyAuthMessage(raw: string): string {
   */
 
   if (message.includes("already registered") || message.includes("already been registered")) {
-    return (
-      "There is already an account with that email — which is good news. Switch to “Log in” above and " +
-      "put in your password."
-    );
+    return "alreadyRegistered";
   }
 
   if (message.includes("login credentials") || message.includes("invalid credentials")) {
-    return (
-      "That email and password do not go together. Passwords are case-sensitive, so it is worth checking " +
-      "whether caps lock is on. If you have never made an account, choose “Create account” above."
-    );
+    return "wrongPassword";
   }
 
-  if (message.includes("password") && (message.includes("at least") || message.includes("weak") || message.includes("short"))) {
-    return `Your password needs to be at least ${MIN_PASSWORD} characters. Longer is better than complicated.`;
+  if (
+    message.includes("password") &&
+    (message.includes("at least") || message.includes("weak") || message.includes("short"))
+  ) {
+    return "shortPassword";
   }
 
-  if (message.includes("not confirmed")) {
-    return (
-      "This account has not been confirmed yet. Open the email we sent when you signed up and follow the link " +
-      "in it, then come back and log in."
-    );
+  if (message.includes("not confirmed")) return "notConfirmed";
+
+  if (
+    message.includes("rate limit") ||
+    message.includes("only request this after") ||
+    message.includes("too many")
+  ) {
+    return "rateLimited";
   }
 
-  if (message.includes("rate limit") || message.includes("only request this after") || message.includes("too many")) {
-    return "That is a few attempts in quick succession. Give it a minute, then try once more.";
-  }
-
-  if (message.includes("email") && (message.includes("not valid") || message.includes("invalid") || message.includes("unable to validate"))) {
-    return "That does not look like an email address. Could you check it over?";
+  if (
+    message.includes("email") &&
+    (message.includes("not valid") ||
+      message.includes("invalid") ||
+      message.includes("unable to validate"))
+  ) {
+    return "badEmail";
   }
 
   if (message.includes("signups not allowed") || message.includes("disabled")) {
-    return (
-      "New accounts are switched off at the moment. You can still carry on without one — " +
-      "your answers are kept safely on this device."
-    );
+    return "signupsDisabled";
   }
 
-  if (message.includes("fetch") || message.includes("network")) return OFFLINE;
+  if (message.includes("fetch") || message.includes("network")) return "offline";
 
-  return "That did not work, and it is very likely our fault rather than yours. Please try once more.";
+  return "generic";
 }
