@@ -23,6 +23,16 @@ export async function SiteFooter() {
             <li>
               <FooterLink href="/lawyers">{t("nav.talkToLawyer")}</FooterLink>
             </li>
+            {/*
+              Also in the header on a laptop, and only here on a phone,
+              where the header has no room for them.
+            */}
+            <li>
+              <FooterLink href="/recovery">{t("nav.recovery")}</FooterLink>
+            </li>
+            <li>
+              <FooterLink href="/hidden-assets">{t("nav.findLostMoney")}</FooterLink>
+            </li>
           </ul>
         </nav>
 

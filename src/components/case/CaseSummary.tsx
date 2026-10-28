@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { DEMO_CASE, DEMO_CLAIMS, TONE_CLASSES } from "@/lib/demo";
 import type { AssetRow, CaseRecord } from "@/lib/caseStore";
@@ -121,7 +122,22 @@ export function CaseSummary() {
           </Card>
         )}
 
-        {assets.length > 0 && (
+        {/*
+          The tracked-assets card is shown even with nothing in it, with
+          an explanation and the way to the searches. Omitting the card
+          entirely left a family who had answered the questions but
+          found nothing yet looking at a page that just stopped, with no
+          hint that searching was the next thing to do.
+        */}
+        {assets.length === 0 ? (
+          <Card className="mt-5">
+            <h2 className="text-xl">{t("trackedTitle")}</h2>
+            <p className="mt-3 text-ink-soft">{t("noAssetsBody")}</p>
+            <Button href="/hidden-assets" variant="secondary" className="mt-6 w-full sm:w-auto">
+              {t("noAssetsButton")}
+            </Button>
+          </Card>
+        ) : (
           <Card className="mt-5">
             <h2 className="text-xl">{t("trackedTitle")}</h2>
             <ul className="mt-5 divide-y divide-line">

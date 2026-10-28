@@ -3,7 +3,8 @@
     "name": "Aasra",
     "tagline": "Step-by-step help for families claiming a deceased person's assets.",
     "description": "A step-by-step guide for families in India claiming the deceased person's bank accounts, insurance, EPF, shares, and property.",
-    "legalLine": "Aasra is a technology and service platform, not a law firm. The guidance here is not legal advice. A lawyer reviews anything legal before it is filed."
+    "legalLine": "Aasra is a technology and service platform, not a law firm. The guidance here is not legal advice. A lawyer reviews anything legal before it is filed.",
+    "notALawFirmShort": "A technology and service platform, not a law firm."
   },
   "language": {
     "label": "Language",
@@ -559,7 +560,9 @@
     "child": "Child",
     "recoveryTitle": "What the family may be able to recover",
     "recoveryBody": "See an estimated range based on everything entered so far, with the full calculation and the official source for each figure.",
-    "recoveryButton": "See the recovery estimate"
+    "recoveryButton": "See the recovery estimate",
+    "noAssetsBody": "Nothing is being tracked yet. Once an account, a policy, or a plot of land is found, it is listed here. The government portals are the place to look.",
+    "noAssetsButton": "Search for lost money"
   },
   "lawyers": {
     "title": "Talk to a lawyer",

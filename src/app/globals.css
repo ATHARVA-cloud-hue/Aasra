@@ -18,7 +18,15 @@
   /* Text (deep charcoal, never pure black) */
   --color-ink: #2d2d2a;
   --color-ink-soft: #55554f;
-  --color-ink-muted: #77756c;
+  /*
+    Darkened from #77756c, which measured 4.32:1 against the cream page
+    background and so failed WCAG AA for normal-size text. This token is
+    used almost entirely on small text (helper lines, captions, the
+    "opens in a new tab" addresses), which is exactly where the 4.5:1
+    threshold matters most. #6b6960 measures 5.15:1 on cream and 5.42:1
+    on paper, leaving headroom.
+  */
+  --color-ink-muted: #6b6960;
 
   /* Sage green accent */
   --color-sage-50: #f1f5f1;

@@ -28,12 +28,24 @@ export async function SiteHeader() {
         </Link>
 
         <nav aria-label={t("nav.getHelp")} className="flex flex-wrap items-center gap-x-1 gap-y-1">
-          <HeaderLink href="/recovery" label={t("nav.recoveryFull")}>
-            {t("nav.recovery")}
-          </HeaderLink>
-          <HeaderLink href="/hidden-assets" label={t("nav.findLostMoneyFull")}>
-            {t("nav.findLostMoney")}
-          </HeaderLink>
+          {/*
+            These two are hidden below the sm breakpoint. Six items plus
+            a logo will not fit across a 375px phone, and letting them
+            wrap pushed the header to three lines and the page content
+            below the fold.
+
+            Nothing becomes unreachable: both have a prominent card on
+            the home page and both are in the footer, which is where
+            they are reachable from on a phone.
+          */}
+          <span className="hidden sm:contents">
+            <HeaderLink href="/recovery" label={t("nav.recoveryFull")}>
+              {t("nav.recovery")}
+            </HeaderLink>
+            <HeaderLink href="/hidden-assets" label={t("nav.findLostMoneyFull")}>
+              {t("nav.findLostMoney")}
+            </HeaderLink>
+          </span>
           <HeaderLink href="/lawyers">{t("nav.talkToLawyer")}</HeaderLink>
           <LanguageSwitcher />
           <HeaderAuth />
