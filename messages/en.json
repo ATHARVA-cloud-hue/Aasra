@@ -377,9 +377,9 @@
       "privateFaith": "You chose not to give the faith of the deceased person, which is your right. These are the closest family, who are heirs under every one of India's succession laws. The exact shares depend on which law applies, so the shares are left open.",
       "unknownFaith": "These are the closest family. Once the applicable law is known, this page shows each share.",
       "hinduShares": "With no will, the estate is divided equally between the closest family. {count, plural, =1 {Here that is one heir, who takes the whole estate.} other {Here that is # heirs, so each heir takes {top}/{bottom} of the estate.}}",
-      "indianSpouseAndChildren": "With no will, the surviving spouse takes 1/3 of the estate. The children share the remaining 2/3 equally between them.",
+      "indianSpouseAndChildren": "With no will, the surviving spouse takes 1/3 of the estate. The children share the remaining 2/3 of the estate in equal parts.",
       "indianSpouseOnly": "With no will and no children, the whole estate goes to the surviving spouse.",
-      "indianSpouseAndOthers": "With no will and no children, the surviving spouse inherits. You have also entered another close relative, and where there is no child the order between them depends on exactly who survives. The shares are left for a lawyer to set.",
+      "indianSpouseAndOthers": "With no will and no children, the surviving spouse inherits. You have also entered another close relative, and where there is no child the order between those relatives depends on exactly who survives. The shares are left for a lawyer to set.",
       "indianOnlyChild": "With no will and no surviving spouse, the only child inherits the whole estate.",
       "indianChildren": "With no will and no surviving spouse, the estate is shared equally between the children.",
       "indianOther": "With no spouse and no children, the estate passes to the next closest relatives. The Act sets an order for this that depends on exactly who survives, so the shares are left for a lawyer to set."
@@ -400,7 +400,7 @@
       "equalOther": "A Class I heir, taking one equal share.",
       "spouseThird": "The surviving spouse takes 1/3 of the estate under {law}.",
       "onlyChildTwoThirds": "The only child takes the remaining 2/3 of the estate.",
-      "childrenShareTwoThirds": "The children share the remaining 2/3 equally between {count} of them, so {top}/{bottom} of the estate each.",
+      "childrenShareTwoThirds": "The remaining 2/3 of the estate is shared equally between {count} children, so {top}/{bottom} of the estate each.",
       "spouseEverything": "With no children, the surviving spouse inherits everything under {law}.",
       "onlyChildEverything": "The only child inherits everything under {law}.",
       "childrenEqual": "The children inherit in equal parts under {law}."
@@ -431,7 +431,7 @@
     "notes": {
       "notKnown": "Enter the faith of the deceased person. This page then names the law that applies to your family, and explains how an estate is divided under it.",
       "hindu": "This Act covers Hindus, Sikhs, Buddhists, and Jains. That is the Act's own definition, not a statement about these being one faith. Where there is no will, the closest family each take one equal share: a surviving spouse, every child, and a surviving mother alike. Sons and daughters inherit the same.",
-      "indian": "Where there is no will, a surviving spouse takes 1/3 of the estate, and the children share the remaining 2/3 between them. With no children, the spouse inherits everything. With no spouse, the children share the estate equally.",
+      "indian": "Where there is no will, a surviving spouse takes 1/3 of the estate, and the children share the remaining 2/3 of the estate in equal parts. With no children, the spouse inherits everything. With no spouse, the children share the estate equally.",
       "muslim": "Shares are set by personal law rather than by a single Act of Parliament. The shares depend on exactly which relatives survive and which school of law the family follows. This app names the likely heirs, and a lawyer who practises in this area works out each share. A wrong fraction would be worse than an open question.",
       "private": "You would rather not say, which is your right. This app can still show the closest family, who are heirs under every one of India's succession laws. Which law sets the exact shares depends on that answer, so the shares are left for a lawyer.",
       "other": "The app confirms which of India's succession laws applies to your family before anything is filed."
@@ -472,7 +472,7 @@
       "epfo": {
         "name": "Provident fund",
         "what": "The Employees' Provident Fund Organisation holds retirement savings from every job the deceased person held, along with a pension and a linked insurance payout.",
-        "why": "Money is often left behind at an employer from years ago. The family of someone who was still working may also be owed a pension and an insurance amount nobody told them about.",
+        "why": "Money is often left behind at an employer from years ago. The family of someone who was still working may also be owed a pension and an insurance amount that nobody mentioned.",
         "placeholder": "For example: UAN 100123456789, from the years at Tata Motors"
       },
       "irdai": {
